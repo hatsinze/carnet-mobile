@@ -22,6 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!token) { setIsLoading(false); return; }
       try {
         const res = await apiClient.get<AuthUser>('/me');
+        //console.log(res);
         setUser(res.data);
       } catch {
         await clearAuthToken();
