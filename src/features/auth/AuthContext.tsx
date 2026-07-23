@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { apiClient, setAuthToken, clearAuthToken } from '../../lib/api-client';
+import { apiClient, setAuthToken, clearAuthToken, setUnauthorizedHandler } from '../../lib/api-client';
 import type { AuthUser } from '../../types/auth';
 
 interface AuthContextValue {
@@ -17,12 +17,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setUnauthorizedHandler(() => setUser(null));
+  }, []);
+
+  useEffect(() => {
     (async () => {
       const token = await SecureStore.getItemAsync('auth_token');
       if (!token) { setIsLoading(false); return; }
       try {
         const res = await apiClient.get<AuthUser>('/me');
-        //console.log(res);
         setUser(res.data);
       } catch {
         await clearAuthToken();
