@@ -13,6 +13,7 @@ export default function ParentLayout() {
           <Tabs.Screen name="paiements" options={{ title: 'Paiements', tabBarIcon: ({ color, size }) => <Ionicons name="card-outline" size={size} color={color} /> }} />
           <Tabs.Screen name="messages" options={{ title: 'Messages', tabBarIcon: ({ color, size }) => <Ionicons name="chatbubble-outline" size={size} color={color} /> }} />
           <Tabs.Screen name="plus" options={{ title: 'Plus', tabBarIcon: ({ color, size }) => <Ionicons name="menu-outline" size={size} color={color} /> }} />
+          <Tabs.Screen name="communiques" options={{ href: null }} />
         </Tabs>
       </ChildLoader>
     </ChildProvider>
