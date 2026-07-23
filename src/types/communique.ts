@@ -9,5 +9,5 @@ export interface Communique {
   publie_le: string | null;
   auteur: string | null;
   lu: boolean | null;
-  confirmation: 'en_attente' | 'confirme' | 'decline' | null;
+  confirmation: 'oui' | 'non' | null;
 }

@@ -27,7 +27,7 @@ export function useCommunique(id: number | undefined) {
 export function useConfirmerPresence(communiqueId: number) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (confirmation: 'confirme' | 'decline') =>
+    mutationFn: (confirmation: 'oui' | 'non') =>
       apiClient.post(`/communiques/${communiqueId}/confirmer-presence`, { confirmation }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['communiques', communiqueId] });

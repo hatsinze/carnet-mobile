@@ -32,29 +32,30 @@ export default function CommuniqueDetailScreen() {
           {data.date_heure_reunion && <Text style={styles.reunionInfo}>{data.date_heure_reunion}</Text>}
           {data.lieu && <Text style={styles.reunionInfo}>{data.lieu}</Text>}
 
-          {data.confirmation === 'en_attente' || data.confirmation === null ? (
+          {data.confirmation === null ? (
             <View style={styles.confirmRow}>
-              <View style={styles.confirmButton}>
+                <View style={styles.confirmButton}>
                 <Button
-                  label="Confirmer présence"
-                  onPress={() => confirmerPresence.mutate('confirme')}
-                  loading={confirmerPresence.isPending}
+                    label="Confirmer présence"
+                    onPress={() => confirmerPresence.mutate('oui')}
+                    loading={confirmerPresence.isPending}
                 />
-              </View>
-              <View style={styles.confirmButton}>
+                </View>
+                <View style={styles.confirmButton}>
                 <Button
-                  label="Décliner"
-                  variant="destructive"
-                  onPress={() => confirmerPresence.mutate('decline')}
-                  loading={confirmerPresence.isPending}
+                    label="Décliner"
+                    variant="destructive"
+                    onPress={() => confirmerPresence.mutate('non')}
+                    loading={confirmerPresence.isPending}
                 />
-              </View>
+                </View>
             </View>
-          ) : (
+            ) : (
             <Text style={styles.confirmedText}>
-              {data.confirmation === 'confirme' ? 'Présence confirmée ✓' : 'Vous avez décliné cette réunion'}
+                {data.confirmation === 'oui' ? 'Présence confirmée ✓' : 'Vous avez décliné cette réunion'}
             </Text>
-          )}
+            )}
+
         </Card>
       )}
     </ScrollView>
