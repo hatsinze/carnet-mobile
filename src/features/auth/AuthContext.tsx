@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import * as SecureStore from 'expo-secure-store';
 import { apiClient, setAuthToken, clearAuthToken, setUnauthorizedHandler } from '../../lib/api-client';
 import type { AuthUser } from '../../types/auth';
+import { syncDeviceToken, unregisterDeviceToken } from '../../hooks/useDeviceToken';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -27,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const res = await apiClient.get<AuthUser>('/me');
         setUser(res.data);
+        syncDeviceToken();
       } catch {
         await clearAuthToken();
         setUser(null);
@@ -40,9 +42,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const response = await apiClient.post<{ token: string; user: AuthUser }>('/login', { email, password });
     await setAuthToken(response.data.token);
     setUser(response.data.user);
+    syncDeviceToken(); // fire-and-forget — don't block login on push registration
   }
 
   async function logout() {
+    await unregisterDeviceToken();
     try { await apiClient.post('/logout'); } catch {}
     await clearAuthToken();
     setUser(null);

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "73918468620",
+    "project_id": "carnet-mobile-5862f",
+    "storage_bucket": "carnet-mobile-5862f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:73918468620:android:fba45b2b92b059d5d7d429",
+        "android_client_info": {
+          "package_name": "com.hatsinze.carnetmobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlxvgX981ktJsAFq4hHSiUsVq-IRDvgtI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
