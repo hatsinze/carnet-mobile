@@ -1,15 +1,21 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../lib/api-client';
-import type { Conversation, ConversationType, Message } from '../types/conversation';
-//import { useRouter } from 'expo-router';
+import type { Conversation, Message, ConversationType } from '../types/conversation';
+import type { PaginatedResponse } from '../types/pagination';
 
-async function fetchConversations(): Promise<Conversation[]> {
-  const res = await apiClient.get<{ data: Conversation[] }>('/conversations');
-  return res.data.data;
+async function fetchConversationsPage(page: number): Promise<PaginatedResponse<Conversation>> {
+  const res = await apiClient.get<PaginatedResponse<Conversation>>('/conversations', { params: { page } });
+  return res.data;
 }
 
 export function useConversations() {
-  return useQuery({ queryKey: ['conversations'], queryFn: fetchConversations });
+  return useInfiniteQuery({
+    queryKey: ['conversations'],
+    queryFn: ({ pageParam }) => fetchConversationsPage(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.current_page < lastPage.meta.last_page ? lastPage.meta.current_page + 1 : undefined,
+  });
 }
 
 async function fetchConversation(id: number): Promise<Conversation> {
@@ -22,7 +28,7 @@ export function useConversation(id: number | undefined) {
     queryKey: ['conversations', id],
     queryFn: () => fetchConversation(id!),
     enabled: !!id,
-    refetchInterval: 15000, // simple polling for new replies — no websockets in this MVP
+    refetchInterval: 15000,
   });
 }
 
