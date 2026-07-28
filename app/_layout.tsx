@@ -7,6 +7,7 @@ import { ErrorBoundary } from "../src/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "../src/features/auth/AuthContext";
 import { queryClient } from "../src/lib/query-client";
 import { colors } from "../src/theme/tokens";
+import { OfflineBanner } from '../src/components/OfflineBanner';
 
 function RootNavigation() {
   const { user, isLoading } = useAuth();
@@ -83,6 +84,7 @@ export default function RootLayout() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
+          <OfflineBanner />
           <RootNavigation />
         </AuthProvider>
       </QueryClientProvider>

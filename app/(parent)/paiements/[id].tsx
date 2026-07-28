@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Linking, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Card } from '../../../src/components/Card';
 import { Button } from '../../../src/components/Button';
@@ -7,6 +7,7 @@ import { ErrorState } from '../../../src/components/ErrorState';
 import { EmptyState } from '../../../src/components/EmptyState';
 import { usePaiementsHistory } from '../../../src/hooks/usePaiementsHistory';
 import { colors, spacing, typography } from '../../../src/theme/tokens';
+import { downloadAndOpenPdf } from '../../../src/lib/download';
 
 const MODE_LABELS: Record<string, string> = {
   especes: 'Espèces',
@@ -43,11 +44,19 @@ export default function PaiementDetailScreen() {
               <Text style={styles.reference}>Réf : {item.reference_transaction}</Text>
             )}
             {item.recu && (
+
               <Button
                 label={`Télécharger le reçu (${item.recu.numero_recu})`}
                 variant="secondary"
-                onPress={() => Linking.openURL(item.recu!.url_telechargement)}
+                onPress={async () => {
+                  try {
+                    await downloadAndOpenPdf(item.recu!.url_telechargement, `recu-${item.recu!.numero_recu}.pdf`);
+                  } catch (e) {
+                    console.warn('Receipt download failed:', e);
+                  }
+                }}
               />
+
             )}
           </Card>
         )}
