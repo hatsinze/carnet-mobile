@@ -20,7 +20,7 @@ export default function ResultatsScreen() {
     if (periodes && periodes.length > 0 && !selectedPeriodeId) {
       setSelectedPeriodeId(periodes[periodes.length - 1].id);
     }
-  }, [periodes]);
+  }, [periodes, selectedPeriodeId]);
 
   const {
     data: moyennes, isLoading: moyennesLoading, isError, refetch, isRefetching, dataUpdatedAt,

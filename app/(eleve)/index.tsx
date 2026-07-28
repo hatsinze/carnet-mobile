@@ -20,7 +20,7 @@ export default function ResultatsScreen() {
     if (periodes && periodes.length > 0 && !periodeId) {
       setPeriodeId(periodes[periodes.length - 1].id);
     }
-  }, [periodes]);
+  }, [periodes, periodeId]);
 
   const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useEleveResultats(periodeId);
 
