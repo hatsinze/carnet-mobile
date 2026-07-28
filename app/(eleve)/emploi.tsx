@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
-import { View, Text, SectionList, StyleSheet } from 'react-native';
+import { View, Text, SectionList, StyleSheet, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LoadingState } from '../../src/components/LoadingState';
 import { ErrorState } from '../../src/components/ErrorState';
 import { EmptyState } from '../../src/components/EmptyState';
+import { LastUpdated } from '../../src/components/LastUpdated';
 import { useEleveCalendrier } from '../../src/hooks/useEleveCalendrier';
 import type { EvenementCalendrier } from '../../src/types/calendrier';
 import { colors, radius, spacing, typography } from '../../src/theme/tokens';
@@ -24,7 +25,7 @@ function isToday(dateStr: string): boolean {
 }
 
 export default function EmploiDuTempsScreen() {
-  const { data, isLoading, isError, refetch } = useEleveCalendrier();
+  const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useEleveCalendrier();
 
   const sections = useMemo(() => {
     if (!data) return [];
@@ -49,6 +50,8 @@ export default function EmploiDuTempsScreen() {
       sections={sections}
       keyExtractor={(item) => String(item.id)}
       contentContainerStyle={styles.content}
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.encre} />}
+      ListHeaderComponent={<LastUpdated timestamp={dataUpdatedAt} />}
       renderSectionHeader={({ section: { title } }) => {
         const today = isToday(title);
         return (

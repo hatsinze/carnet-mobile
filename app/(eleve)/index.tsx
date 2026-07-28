@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../src/components/Card';
 import { LoadingState } from '../../src/components/LoadingState';
 import { ErrorState } from '../../src/components/ErrorState';
 import { EmptyState } from '../../src/components/EmptyState';
+import { LastUpdated } from '../../src/components/LastUpdated';
 import { useAuth } from '../../src/features/auth/AuthContext';
 import { usePeriodes } from '../../src/hooks/usePeriodes';
 import { useEleveResultats } from '../../src/hooks/useEleveResultats';
@@ -19,9 +20,9 @@ export default function ResultatsScreen() {
     if (periodes && periodes.length > 0 && !periodeId) {
       setPeriodeId(periodes[periodes.length - 1].id);
     }
-  }, [periodes, periodeId]);
+  }, [periodes]);
 
-  const { data, isLoading, isError, refetch } = useEleveResultats(periodeId);
+  const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useEleveResultats(periodeId);
 
   return (
     <View style={styles.container}>
@@ -49,7 +50,11 @@ export default function ResultatsScreen() {
         </ScrollView>
       )}
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.encre} />}
+      >
+        <LastUpdated timestamp={dataUpdatedAt} />
         {isLoading && <LoadingState />}
         {isError && <ErrorState onRetry={refetch} />}
 

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from '../../src/components/Card';
 import { StatusBadge } from '../../src/components/StatusBadge';
 import { LoadingState } from '../../src/components/LoadingState';
 import { ErrorState } from '../../src/components/ErrorState';
 import { EmptyState } from '../../src/components/EmptyState';
+import { LastUpdated } from '../../src/components/LastUpdated';
 import { useAuth } from '../../src/features/auth/AuthContext';
 import { usePeriodes } from '../../src/hooks/usePeriodes';
 import { useEleveSanctions } from '../../src/hooks/useEleveSanctions';
@@ -42,11 +43,17 @@ export default function ComportementScreen() {
     if (periodes && periodes.length > 0 && !periodeId) {
       setPeriodeId(periodes[periodes.length - 1].id);
     }
-  }, [periodes, periodeId]);
+  }, [periodes]);
 
   const eleveId = user?.eleve?.id;
-  const { data: sanctions, isLoading: sanctionsLoading, isError: sanctionsError, refetch: refetchSanctions } = useEleveSanctions(eleveId, periodeId);
-  const { data: bilan, isLoading: bilanLoading, isError: bilanError, refetch: refetchBilan } = useBilanEleve(eleveId, periodeId);
+  const {
+    data: sanctions, isLoading: sanctionsLoading, isError: sanctionsError,
+    refetch: refetchSanctions, isRefetching: sanctionsRefetching,
+  } = useEleveSanctions(eleveId, periodeId);
+  const {
+    data: bilan, isLoading: bilanLoading, isError: bilanError,
+    refetch: refetchBilan, isRefetching: bilanRefetching, dataUpdatedAt,
+  } = useBilanEleve(eleveId, periodeId);
 
   const score = bilan?.score;
   const pourcentage = score?.pourcentage ?? 0;
@@ -56,6 +63,11 @@ export default function ComportementScreen() {
     medium: { label: 'À surveiller', color: colors.soleil, icon: 'alert-circle-outline' as const },
     low: { label: 'Attention nécessaire', color: colors.brique, icon: 'warning-outline' as const },
   }[level];
+
+  function handleRefresh() {
+    refetchSanctions();
+    refetchBilan();
+  }
 
   return (
     <View style={styles.container}>
@@ -80,7 +92,13 @@ export default function ComportementScreen() {
         </ScrollView>
       )}
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={sanctionsRefetching || bilanRefetching} onRefresh={handleRefresh} tintColor={colors.encre} />
+        }
+      >
+        <LastUpdated timestamp={dataUpdatedAt} />
         {bilanLoading && <LoadingState />}
         {bilanError && <ErrorState onRetry={refetchBilan} />}
 

@@ -1,21 +1,27 @@
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, StyleSheet } from 'react-native';
 import { ChildSwitcher } from '../../src/components/ChildSwitcher';
 import { Card } from '../../src/components/Card';
 import { StatusBadge } from '../../src/components/StatusBadge';
 import { LoadingState } from '../../src/components/LoadingState';
 import { ErrorState } from '../../src/components/ErrorState';
+import { LastUpdated } from '../../src/components/LastUpdated';
 import { useChildContext } from '../../src/features/children/ChildContext';
 import { useEleveStats } from '../../src/hooks/useEleveStats';
 import { colors, spacing, typography } from '../../src/theme/tokens';
 
 export default function AccueilScreen() {
   const { selectedChild } = useChildContext();
-  const { data: stats, isLoading, isError, refetch } = useEleveStats(selectedChild?.id);
+  const { data: stats, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useEleveStats(selectedChild?.id);
 
   return (
     <View style={styles.container}>
       <ChildSwitcher />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.encre} />}
+      >
+        <LastUpdated timestamp={dataUpdatedAt} />
+
         {selectedChild && (
           <Text style={styles.greeting}>
             {selectedChild.prenom} {selectedChild.nom}

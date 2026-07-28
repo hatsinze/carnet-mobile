@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, Pressable, StyleSheet } from 'react-native';
 import { ChildSwitcher } from '../../src/components/ChildSwitcher';
 import { Card } from '../../src/components/Card';
 import { LoadingState } from '../../src/components/LoadingState';
 import { ErrorState } from '../../src/components/ErrorState';
 import { EmptyState } from '../../src/components/EmptyState';
+import { LastUpdated } from '../../src/components/LastUpdated';
 import { useChildContext } from '../../src/features/children/ChildContext';
 import { usePeriodes } from '../../src/hooks/usePeriodes';
 import { useMoyennes } from '../../src/hooks/useMoyennes';
@@ -16,15 +17,14 @@ export default function ResultatsScreen() {
   const [selectedPeriodeId, setSelectedPeriodeId] = useState<number | undefined>();
 
   useEffect(() => {
-    if (periodes && periodes.length > 0 && selectedPeriodeId === undefined) {
+    if (periodes && periodes.length > 0 && !selectedPeriodeId) {
       setSelectedPeriodeId(periodes[periodes.length - 1].id);
     }
-  }, [periodes, selectedPeriodeId]);
+  }, [periodes]);
 
-  const { data: moyennes, isLoading: moyennesLoading, isError, refetch } = useMoyennes(
-    selectedChild?.id,
-    selectedPeriodeId
-  );
+  const {
+    data: moyennes, isLoading: moyennesLoading, isError, refetch, isRefetching, dataUpdatedAt,
+  } = useMoyennes(selectedChild?.id, selectedPeriodeId);
 
   return (
     <View style={styles.container}>
@@ -49,7 +49,11 @@ export default function ResultatsScreen() {
         </ScrollView>
       )}
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.encre} />}
+      >
+        <LastUpdated timestamp={dataUpdatedAt} />
         {moyennesLoading && <LoadingState />}
         {isError && <ErrorState onRetry={refetch} />}
         {moyennes && moyennes.length === 0 && (
