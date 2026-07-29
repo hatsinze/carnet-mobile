@@ -16,3 +16,11 @@ export interface PaiementHistorique {
   reference_transaction: string | null;
   recu: { numero_recu: string; url_telechargement: string } | null;
 }
+
+export interface FinancialSummary {
+  totalDue: number;
+  totalPaid: number;
+  remaining: number;
+  enRetardCount: number;
+  echeanceCount: number;
+}

@@ -8,6 +8,30 @@ import { AuthProvider, useAuth } from "../src/features/auth/AuthContext";
 import { queryClient } from "../src/lib/query-client";
 import { colors } from "../src/theme/tokens";
 import { OfflineBanner } from '../src/components/OfflineBanner';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import * as SplashScreen from 'expo-splash-screen';
+import {
+  useFonts,
+  Fraunces_300Light,
+  Fraunces_400Regular,
+  Fraunces_600SemiBold,
+  Fraunces_700Bold,
+  Fraunces_900Black,
+} from '@expo-google-fonts/fraunces';
+import {
+  IBMPlexSans_400Regular,
+  IBMPlexSans_500Medium,
+  IBMPlexSans_600SemiBold,
+  IBMPlexSans_700Bold,
+} from '@expo-google-fonts/ibm-plex-sans';
+import {
+  IBMPlexMono_500Medium,
+  IBMPlexMono_600SemiBold,
+  IBMPlexMono_700Bold,
+} from '@expo-google-fonts/ibm-plex-mono';
+
+SplashScreen.preventAutoHideAsync();
 
 function RootNavigation() {
   const { user, isLoading } = useAuth();
@@ -80,14 +104,28 @@ function RootNavigation() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Fraunces_300Light, Fraunces_400Regular, Fraunces_600SemiBold, Fraunces_700Bold, Fraunces_900Black,
+    IBMPlexSans_400Regular, IBMPlexSans_500Medium, IBMPlexSans_600SemiBold, IBMPlexSans_700Bold,
+    IBMPlexMono_500Medium, IBMPlexMono_600SemiBold, IBMPlexMono_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync();
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
+
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <OfflineBanner />
-          <RootNavigation />
-        </AuthProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <OfflineBanner />
+            <RootNavigation />
+          </AuthProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
