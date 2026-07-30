@@ -47,3 +47,13 @@ export const typography = {
   body: { fontFamily: fonts.body, fontSize: 15, lineHeight: 22 },
   label: { fontFamily: fonts.bodyMedium, fontSize: 12, lineHeight: 16, letterSpacing: 0.4 },
 };
+
+export const shadows = {
+  card: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 2,
+  },
+};
