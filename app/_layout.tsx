@@ -3,12 +3,14 @@ import * as Notifications from "expo-notifications";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { StatusBar } from 'expo-status-bar';
 import { ErrorBoundary } from "../src/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "../src/features/auth/AuthContext";
 import { queryClient } from "../src/lib/query-client";
 import { colors } from "../src/theme/tokens";
 import { OfflineBanner } from '../src/components/OfflineBanner';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider, useTheme } from '../src/features/theme/ThemeContext';
 
 import * as SplashScreen from 'expo-splash-screen';
 import {
@@ -63,6 +65,7 @@ function RootNavigation() {
           unknown
         >;
         const isParent = user.roles.includes("parent");
+        const base = isParent ? "/(parent)" : "/(eleve)";
 
         switch (data.type) {
           case "note":
@@ -85,6 +88,9 @@ function RootNavigation() {
           case "paiement":
             if (isParent) router.push("/paiements");
             break;
+          case "message":
+            if (isParent) router.push(`${base}/messages/${data.conversation_id}`);
+            break;
         }
       },
     );
@@ -103,6 +109,18 @@ function RootNavigation() {
   return <Slot />;
 }
 
+function RootNavigationWithStatusBar() {
+  const { isDark } = useTheme();
+  const backgroundColor = isDark ? '#0A0A0A' : colors.brume;
+  
+  return (
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={backgroundColor} translucent={false} />
+      <RootNavigation />
+    </>
+  );
+}
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Fraunces_300Light, Fraunces_400Regular, Fraunces_600SemiBold, Fraunces_700Bold, Fraunces_900Black,
@@ -117,15 +135,17 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <SafeAreaProvider>
-      <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <OfflineBanner />
-            <RootNavigation />
-          </AuthProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <OfflineBanner />
+              <RootNavigationWithStatusBar />
+            </AuthProvider>
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </SafeAreaProvider>
+    </ThemeProvider>
   );
 }

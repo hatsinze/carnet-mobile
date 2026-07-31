@@ -8,8 +8,11 @@ import { Avatar } from '../../src/components/Avatar';
 import { FadeInUp, PressableScale } from '../../src/components/Motion';
 import { LoadingState } from '../../src/components/LoadingState';
 import { ErrorState } from '../../src/components/ErrorState';
+import { useTheme } from '../../src/features/theme/ThemeContext';
 import { useChildContext } from '../../src/features/children/ChildContext';
 import { useEleveStats } from '../../src/hooks/useEleveStats';
+import { usePeriodes } from '../../src/hooks/usePeriodes';
+import { useBilanEleve } from '../../src/hooks/useBilanEleve';
 import { useUpcomingEvenements } from '../../src/hooks/useAccueilExtras';
 import { useCommuniques } from '../../src/hooks/useCommuniques';
 import { useFinancialSummary } from '../../src/hooks/useFinancialSummary';
@@ -50,16 +53,20 @@ const cardShadow = {
 export default function AccueilScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const { selectedChild } = useChildContext();
   const { data: stats, isLoading, isError, refetch, isRefetching } = useEleveStats(selectedChild?.id);
+  const { data: periodes } = usePeriodes();
+  const currentPeriodeId = periodes && periodes.length > 0 ? periodes[0].id : undefined;
+  const { data: bilan } = useBilanEleve(selectedChild?.id, currentPeriodeId);
   const { data: upcomingEvents } = useUpcomingEvenements(2);
   const { data: communiquesData } = useCommuniques();
   const { data: financial } = useFinancialSummary(selectedChild?.id);
 
   const fullName = selectedChild ? `${selectedChild.prenom} ${selectedChild.nom}` : '';
-  const disciplineOk = (stats?.fautes ?? 0) === 0 && (stats?.sanctions ?? 0) === 0;
   const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   const latestCommuniques = communiquesData?.pages[0]?.data.slice(0, 2) ?? [];
+  const disciplineScore = bilan?.score;
 
   return (
     <View style={styles.container}>
@@ -92,8 +99,8 @@ export default function AccueilScreen() {
               </View>
               <View style={styles.statDividerLight} />
               <View style={styles.statBlock}>
-                <Ionicons name={disciplineOk ? 'checkmark-circle' : 'alert-circle'} size={24} color={disciplineOk ? '#8FD9B6' : '#F3A98E'} />
-                <Text style={[styles.statLabel, { marginTop: 4 }]}>DISCIPLINE</Text>
+                <Text style={styles.statNumber}>{disciplineScore ? `${disciplineScore.score}/${disciplineScore.base_points}` : '—'}</Text>
+                <Text style={styles.statLabel}>DISCIPLINE</Text>
               </View>
             </View>
           </FadeInUp>
@@ -153,17 +160,19 @@ export default function AccueilScreen() {
             upcomingEvents.map((ev) => {
               const f = formatEventRange(ev.date_debut, ev.date_fin);
               return (
-                <View key={ev.id} style={[styles.eventRow, cardShadow]}>
-                  <View style={[styles.eventDateBox, f.isMultiDay && styles.eventDateBoxWide]}>
-                    <Text style={styles.eventDay}>{f.dayLabel}</Text>
-                    <Text style={styles.eventMonth}>{f.monthLabel}</Text>
+                <PressableScale key={ev.id} onPress={() => router.push('/(parent)/plus/calendrier')}>
+                  <View style={[styles.eventRow, cardShadow]}>
+                    <View style={[styles.eventDateBox, f.isMultiDay && styles.eventDateBoxWide]}>
+                      <Text style={styles.eventDay}>{f.dayLabel}</Text>
+                      <Text style={styles.eventMonth}>{f.monthLabel}</Text>
+                    </View>
+                    <View style={styles.eventInfo}>
+                      <Text style={styles.eventTitle} numberOfLines={1}>{ev.titre}</Text>
+                      <Text style={styles.eventMeta}>{f.subtitle}</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.ardoiseMuted} />
                   </View>
-                  <View style={styles.eventInfo}>
-                    <Text style={styles.eventTitle} numberOfLines={1}>{ev.titre}</Text>
-                    <Text style={styles.eventMeta}>{f.subtitle}</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={16} color={colors.ardoiseMuted} />
-                </View>
+                </PressableScale>
               );
             })
           ) : (
@@ -203,17 +212,20 @@ export default function AccueilScreen() {
 
         <FadeInUp delay={300}>
           <Text style={styles.sectionTitle}>Comportement</Text>
-          <View style={[styles.behaviorCard, cardShadow]}>
-            <View style={[styles.financeIconCircle, { backgroundColor: disciplineOk ? colors.saugeLight : colors.briqueLight }]}>
-              <Ionicons name={disciplineOk ? 'shield-checkmark-outline' : 'shield-outline'} size={18} color={disciplineOk ? colors.sauge : colors.brique} />
+          <PressableScale onPress={() => router.push('/(parent)/plus/comportement')}>
+            <View style={[styles.behaviorCard, cardShadow]}>
+              <View style={[styles.financeIconCircle, { backgroundColor: (stats?.fautes ?? 0) === 0 ? colors.saugeLight : colors.briqueLight }]}>
+                <Ionicons name={(stats?.fautes ?? 0) === 0 ? 'shield-checkmark-outline' : 'shield-outline'} size={18} color={(stats?.fautes ?? 0) === 0 ? colors.sauge : colors.brique} />
+              </View>
+              <View style={styles.behaviorInfo}>
+                <Text style={styles.behaviorTitle}>
+                  {(stats?.fautes ?? 0) === 0 ? 'Bon comportement' : `${stats?.fautes ?? 0} faute(s), ${stats?.sanctions ?? 0} sanction(s)`}
+                </Text>
+                <Text style={styles.behaviorMeta}>Cette période scolaire</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.ardoiseMuted} />
             </View>
-            <View style={styles.behaviorInfo}>
-              <Text style={styles.behaviorTitle}>
-                {disciplineOk ? 'Bon comportement' : `${stats?.fautes ?? 0} faute(s), ${stats?.sanctions ?? 0} sanction(s)`}
-              </Text>
-              <Text style={styles.behaviorMeta}>Cette période scolaire</Text>
-            </View>
-          </View>
+          </PressableScale>
         </FadeInUp>
       </ScrollView>
     </View>

@@ -65,3 +65,13 @@ export function useStartConversation() {
     },
   });
 }
+
+export function useMarkConversationRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversationId: number) => apiClient.post(`/conversations/${conversationId}/read`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+  });
+}

@@ -1,93 +1,112 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, RefreshControl, Pressable, StyleSheet } from 'react-native';
-import { ChildSwitcher } from '../../src/components/ChildSwitcher';
-import { Card } from '../../src/components/Card';
-import { LoadingState } from '../../src/components/LoadingState';
+import { View, Text, ScrollView, RefreshControl, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { ProgressRing } from '../../src/components/ProgressRing';
+import { SegmentedControl } from '../../src/components/SegmentedControl';
+import { CommuniqueCardSkeleton } from '../../src/components/Skeleton';
 import { ErrorState } from '../../src/components/ErrorState';
-import { EmptyState } from '../../src/components/EmptyState';
-import { LastUpdated } from '../../src/components/LastUpdated';
+import { useTheme } from '../../src/features/theme/ThemeContext';
 import { useChildContext } from '../../src/features/children/ChildContext';
 import { usePeriodes } from '../../src/hooks/usePeriodes';
 import { useMoyennes } from '../../src/hooks/useMoyennes';
-import { colors, radius, spacing, typography } from '../../src/theme/tokens';
+import { fonts, radius, spacing } from '../../src/theme/tokens';
 
 export default function ResultatsScreen() {
+  const { colors } = useTheme();
   const { selectedChild } = useChildContext();
-  const { data: periodes, isLoading: periodesLoading } = usePeriodes();
-  const [selectedPeriodeId, setSelectedPeriodeId] = useState<number | undefined>();
+  const { data: periodes } = usePeriodes();
+  const [periodeId, setPeriodeId] = useState<string>('');
 
   useEffect(() => {
-    if (periodes && periodes.length > 0 && !selectedPeriodeId) {
-      setSelectedPeriodeId(periodes[periodes.length - 1].id);
-    }
-  }, [periodes, selectedPeriodeId]);
+    if (periodes && periodes.length > 0 && !periodeId) setPeriodeId(String(periodes[0].id));
+  }, [periodes]);
 
-  const {
-    data: moyennes, isLoading: moyennesLoading, isError, refetch, isRefetching, dataUpdatedAt,
-  } = useMoyennes(selectedChild?.id, selectedPeriodeId);
+  const numericPeriodeId = periodeId ? Number(periodeId) : undefined;
+  const { data: moyennes, isLoading, isError, refetch, isRefetching } = useMoyennes(selectedChild?.id, numericPeriodeId);
+
+  // Safely calculate general average
+  const generalAvg = moyennes && moyennes.length > 0
+    ? moyennes.reduce((sum, m) => sum + m.moyenne * m.coefficient, 0) / moyennes.reduce((sum, m) => sum + m.coefficient, 0)
+    : null;
+  const ringColor = generalAvg !== null ? (generalAvg >= 10 ? colors.sauge : colors.brique) : colors.encre;
+
+  const periodeOptions = (periodes ?? []).map((p) => ({ value: String(p.id), label: p.nom }));
+
+  if (isError) return <ErrorState onRetry={refetch} />;
 
   return (
-    <View style={styles.container}>
-      <ChildSwitcher />
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.brume }}
+      contentContainerStyle={styles.content}
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.encre} />}
+    >
+      <Text style={[styles.headerTitle, { color: colors.ardoise }]}>Résultats</Text>
+      {selectedChild?.classe && <Text style={[styles.headerSub, { color: colors.ardoiseMuted }]}>{selectedChild.classe.nom}</Text>}
 
-      {periodesLoading && <LoadingState />}
-
-      {periodes && periodes.length > 0 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.periodeRow}>
-          {periodes.map((p) => {
-            const isActive = p.id === selectedPeriodeId;
-            return (
-              <Pressable
-                key={p.id}
-                style={[styles.periodePill, isActive && styles.periodePillActive]}
-                onPress={() => setSelectedPeriodeId(p.id)}
-              >
-                <Text style={[styles.periodeLabel, isActive && styles.periodeLabelActive]}>{p.nom}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+      {generalAvg !== null && (
+        <View style={[styles.ringCard, { backgroundColor: colors.blanc, borderColor: colors.ligne }]}>
+          <ProgressRing value={(generalAvg / 20) * 100} color={ringColor} centerLabel={generalAvg.toFixed(1)} centerSubLabel="/ 20" size={100} strokeWidth={9} />
+          <View style={{ flex: 1, marginLeft: spacing.lg }}>
+            <Text style={[styles.ringLabel, { color: colors.ardoiseMuted }]}>Moyenne générale</Text>
+            <Text style={[styles.ringSubtext, { color: colors.ardoise }]}>
+              {moyennes?.length || 0} matière{moyennes?.length !== 1 ? 's' : ''} évaluée{moyennes?.length !== 1 ? 's' : ''}
+            </Text>
+          </View>
+        </View>
       )}
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.encre} />}
-      >
-        <LastUpdated timestamp={dataUpdatedAt} />
-        {moyennesLoading && <LoadingState />}
-        {isError && <ErrorState onRetry={refetch} />}
-        {moyennes && moyennes.length === 0 && (
-          <EmptyState message="Aucune note enregistrée pour cette période." />
-        )}
+      {periodeOptions.length > 0 && (
+        <>
+          <View style={{ height: spacing.lg }} />
+          <SegmentedControl options={periodeOptions} value={periodeId} onChange={setPeriodeId} />
+        </>
+      )}
 
-        {moyennes?.map((m) => (
-          <Card key={m.id} style={styles.matiereCard}>
-            <View style={styles.matiereRow}>
-              <Text style={styles.matiereNom}>{m.matiere}</Text>
-              <Text style={styles.matiereMoyenne}>{m.moyenne}/20</Text>
+      <View style={{ height: spacing.xl }} />
+
+      {isLoading ? (
+        <>{[1, 2, 3].map((i) => <CommuniqueCardSkeleton key={i} />)}</>
+      ) : !moyennes || moyennes.length === 0 ? (
+        <View style={styles.emptyWrap}>
+          <Ionicons name="school-outline" size={40} color={colors.ardoiseMuted} />
+          <Text style={[styles.emptyText, { color: colors.ardoiseMuted }]}>Aucune note enregistrée pour cette période.</Text>
+        </View>
+      ) : (
+        moyennes.map((m) => {
+          const isGood = m.moyenne >= 10;
+          return (
+            <View key={m.id} style={[styles.subjectCard, { backgroundColor: colors.blanc, borderColor: colors.ligne }]}>
+              <View style={[styles.subjectIcon, { backgroundColor: isGood ? colors.saugeLight : colors.briqueLight }]}>
+                <Ionicons name="book-outline" size={18} color={isGood ? colors.sauge : colors.brique} />
+              </View>
+              <View style={styles.subjectInfo}>
+                <Text style={[styles.subjectName, { color: colors.ardoise }]}>{m.matiere}</Text>
+                <Text style={[styles.subjectMeta, { color: colors.ardoiseMuted }]}>
+                  Coef. {m.coefficient}{m.rang_matiere !== null ? ` · Rang ${m.rang_matiere}` : ''}
+                </Text>
+              </View>
+              <Text style={[styles.subjectAvg, { color: isGood ? colors.sauge : colors.brique }]}>{m.moyenne.toFixed(1)}</Text>
             </View>
-            <View style={styles.matiereRow}>
-              <Text style={styles.matiereMeta}>Coef. {m.coefficient}</Text>
-              {m.rang_matiere !== null && <Text style={styles.matiereMeta}>Rang {m.rang_matiere}</Text>}
-            </View>
-          </Card>
-        ))}
-      </ScrollView>
-    </View>
+          );
+        })
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.brume },
-  periodeRow: { paddingHorizontal: spacing.lg, paddingBottom: spacing.md, gap: spacing.sm },
-  periodePill: { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg, borderRadius: radius.lg, backgroundColor: colors.blanc, borderWidth: 1, borderColor: colors.ligne, marginRight: spacing.sm },
-  periodePillActive: { backgroundColor: colors.encre, borderColor: colors.encre },
-  periodeLabel: { fontSize: 14, fontWeight: '500', color: colors.ardoise },
-  periodeLabelActive: { color: colors.blanc },
-  content: { padding: spacing.lg, gap: spacing.md },
-  matiereCard: { marginBottom: spacing.md },
-  matiereRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.xs },
-  matiereNom: { ...typography.body, fontWeight: '600', color: colors.ardoise },
-  matiereMoyenne: { fontSize: 17, fontWeight: '700', color: colors.encre },
-  matiereMeta: { fontSize: 13, color: colors.ardoiseMuted },
+  content: { padding: spacing.lg, paddingBottom: spacing.xxxl },
+  headerTitle: { fontFamily: fonts.displayBold, fontSize: 26 },
+  headerSub: { fontFamily: fonts.body, fontSize: 13, marginTop: 2 },
+  ringCard: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.lg, borderWidth: 1, padding: spacing.lg, marginTop: spacing.lg },
+  ringLabel: { fontFamily: fonts.bodyMedium, fontSize: 12 },
+  ringSubtext: { fontFamily: fonts.bodySemiBold, fontSize: 15, marginTop: 4 },
+  emptyWrap: { alignItems: 'center', paddingVertical: spacing.xxl, gap: spacing.md },
+  emptyText: { fontFamily: fonts.body, fontSize: 13 },
+  subjectCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, borderRadius: radius.md, borderWidth: 1, padding: spacing.md, marginBottom: spacing.sm },
+  subjectIcon: { width: 38, height: 38, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
+  subjectInfo: { flex: 1, minWidth: 0 },
+  subjectName: { fontFamily: fonts.bodySemiBold, fontSize: 14 },
+  subjectMeta: { fontFamily: fonts.body, fontSize: 12, marginTop: 2 },
+  subjectAvg: { fontFamily: fonts.monoBold, fontSize: 18 },
 });

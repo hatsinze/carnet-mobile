@@ -16,5 +16,6 @@ export interface Conversation {
   participants?: { id: number; name: string }[];
   dernier_message: { contenu: string; envoye_le: string } | null;
   messages?: Message[];
+  unread_count?: number;
   updated_at: string;
 }

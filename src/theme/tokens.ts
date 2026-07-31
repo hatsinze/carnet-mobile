@@ -57,3 +57,23 @@ export const shadows = {
     elevation: 2,
   },
 };
+
+export const darkColors = {
+  encre: '#4FA8B8',
+  encreDark: '#0D3338',
+  encreMuted: '#6FA3AC',
+  encreLight: 'rgba(79,168,184,0.16)',
+  ardoise: '#FFFFFF',
+  brume: '#0A0A0F',
+  blanc: '#1C1C1E',
+  sauge: '#6FCF9E',
+  saugeLight: 'rgba(111,207,158,0.14)',
+  brique: '#F28B6E',
+  briqueLight: 'rgba(242,139,110,0.14)',
+  soleil: '#E0B95C',
+  soleilLight: 'rgba(224,185,92,0.14)',
+  or: '#E0B95C',
+  orLight: 'rgba(224,185,92,0.14)',
+  ligne: '#2C2C2E',
+  ardoiseMuted: 'rgba(255,255,255,0.55)',
+};

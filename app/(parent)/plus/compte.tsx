@@ -1,19 +1,18 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TextInput, Pressable, Switch, ScrollView, StyleSheet, Appearance } from 'react-native';
+import { useState } from 'react';
+import { View, Text, TextInput, Pressable, Switch, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Avatar } from '../../../src/components/Avatar';
 import { FadeInUp } from '../../../src/components/Motion';
 import { useAuth } from '../../../src/features/auth/AuthContext';
+import { useTheme } from '../../../src/features/theme/ThemeContext';
 import { useUpdateAccount } from '../../../src/hooks/useUpdateAccount';
 import { useChangePassword } from '../../../src/hooks/useChangePassword';
 import { syncDeviceToken, unregisterDeviceToken } from '../../../src/hooks/useDeviceToken';
 import { colors, fonts, radius, spacing } from '../../../src/theme/tokens';
 
-const THEME_STORAGE_KEY = '@app_theme_preference';
-
 export default function CompteScreen() {
   const { user, logout, refreshUser } = useAuth();
+  const { isDark, setMode } = useTheme();
   const updateAccount = useUpdateAccount();
   const changePassword = useChangePassword();
 
@@ -30,33 +29,24 @@ export default function CompteScreen() {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   const [pushEnabled, setPushEnabled] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  useEffect(() => {
-    loadThemePreference();
-  }, []);
-
-  const loadThemePreference = async () => {
-    try {
-      const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
-      if (savedTheme !== null) {
-        setIsDarkMode(savedTheme === 'dark');
-      } else {
-        const systemTheme = Appearance.getColorScheme();
-        setIsDarkMode(systemTheme === 'dark');
-      }
-    } catch (error) {
-      console.error('Failed to load theme preference:', error);
-    }
+  // Theme colors - using the global theme
+  const themeColors = {
+    background: isDark ? '#0A0A0A' : '#F8F8F8',
+    cardBackground: isDark ? '#1C1C1E' : '#FFFFFF',
+    cardBorder: isDark ? '#2C2C2E' : '#EFEFEF',
+    text: isDark ? '#FFFFFF' : '#0F172A',
+    textMuted: isDark ? '#8E8E93' : '#8E8E93',
+    textSecondary: isDark ? '#636366' : '#636366',
+    inputBackground: isDark ? '#2C2C2E' : '#F5F5F5',
+    inputBorder: isDark ? '#3A3A3C' : '#E5E5E5',
+    divider: isDark ? '#2C2C2E' : '#EFEFEF',
+    iconBackground: isDark ? '#2C2C2E' : '#F0F0F0',
+    separator: isDark ? '#2C2C2E' : '#EFEFEF',
   };
 
-  const handleThemeToggle = async (value: boolean) => {
-    setIsDarkMode(value);
-    try {
-      await AsyncStorage.setItem(THEME_STORAGE_KEY, value ? 'dark' : 'light');
-    } catch (error) {
-      console.error('Failed to save theme preference:', error);
-    }
+  const handleThemeToggle = (value: boolean) => {
+    setMode(value ? 'dark' : 'light');
   };
 
   if (!user) return null;
@@ -98,22 +88,6 @@ export default function CompteScreen() {
     if (value) await syncDeviceToken();
     else await unregisterDeviceToken();
   }
-
-  // Theme colors
-  const isDark = isDarkMode;
-  const themeColors = {
-    background: isDark ? '#000000' : '#F8F8F8',
-    cardBackground: isDark ? '#1C1C1E' : '#FFFFFF',
-    cardBorder: isDark ? '#2C2C2E' : '#EFEFEF',
-    text: isDark ? '#FFFFFF' : '#0F172A',
-    textMuted: isDark ? '#8E8E93' : '#8E8E93',
-    textSecondary: isDark ? '#636366' : '#636366',
-    inputBackground: isDark ? '#2C2C2E' : '#F5F5F5',
-    inputBorder: isDark ? '#3A3A3C' : '#E5E5E5',
-    divider: isDark ? '#2C2C2E' : '#EFEFEF',
-    iconBackground: isDark ? '#2C2C2E' : '#F0F0F0',
-    separator: isDark ? '#2C2C2E' : '#EFEFEF',
-  };
 
   return (
     <ScrollView 
@@ -398,14 +372,14 @@ export default function CompteScreen() {
                   <View>
                     <Text style={[styles.toggleLabel, { color: themeColors.text }]}>Thème sombre</Text>
                     <Text style={[styles.toggleSubtext, { color: themeColors.textMuted }]}>
-                      {isDarkMode ? 'Activé' : 'Désactivé'}
+                      {isDark ? 'Activé' : 'Désactivé'}
                     </Text>
                   </View>
                 </View>
                 <Switch 
-                  value={isDarkMode} 
+                  value={isDark} 
                   onValueChange={handleThemeToggle} 
-                  trackColor={{ false: '#D1D1D6', true: colors.encre }}
+                  trackColor={{ false: '#D1D1D6', true: colors.encre }} 
                   thumbColor={colors.blanc}
                 />
               </View>

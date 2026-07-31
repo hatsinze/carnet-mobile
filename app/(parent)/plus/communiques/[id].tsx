@@ -2,12 +2,12 @@ import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { LoadingState } from '../../../src/components/LoadingState';
-import { ErrorState } from '../../../src/components/ErrorState';
-import { FadeInUp } from '../../../src/components/Motion';
-import { useTheme } from '../../../src/features/theme/ThemeContext';
-import { useCommunique, useConfirmerPresence } from '../../../src/hooks/useCommuniques';
-import { fonts, radius, spacing } from '../../../src/theme/tokens';
+import { LoadingState } from '../../../../src/components/LoadingState';
+import { ErrorState } from '../../../../src/components/ErrorState';
+import { FadeInUp } from '../../../../src/components/Motion';
+import { useTheme } from '../../../../src/features/theme/ThemeContext';
+import { useCommunique, useConfirmerPresence } from '../../../../src/hooks/useCommuniques';
+import { fonts, radius, spacing } from '../../../../src/theme/tokens';
 
 export default function CommuniqueDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -19,11 +19,8 @@ export default function CommuniqueDetailScreen() {
   const confirmerPresence = useConfirmerPresence(communiqueId);
 
   function close() {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/(parent)/communiques');
-    }
+    if (router.canGoBack()) router.back();
+    else router.replace('/(parent)/plus/communiques');
   }
 
   if (isLoading) return <LoadingState />;
