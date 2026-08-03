@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Pressable, Switch, ScrollView, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { Avatar } from '../../../src/components/Avatar';
 import { FadeInUp } from '../../../src/components/Motion';
 import { useAuth } from '../../../src/features/auth/AuthContext';
@@ -90,350 +91,353 @@ export default function CompteScreen() {
   }
 
   return (
-    <ScrollView 
-      style={[styles.container, { backgroundColor: themeColors.background }]} 
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Profile Header - Avatar Left, Name Right */}
-      <FadeInUp delay={80}>
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarWrapper}>
-            <Avatar name={user.name} size={72} />
-          </View>
-          <View style={styles.profileInfo}>
-            <Text style={[styles.userName, { color: themeColors.text }]}>{user.name}</Text>
-            <Text style={[styles.userEmail, { color: themeColors.textMuted }]}>{user.email}</Text>
-            <View style={styles.roleBadge}>
-              <Text style={styles.roleBadgeText}>Parent</Text>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <ScreenHeader title="Mon compte" fallbackRoute="/(parent)/plus" />
+      
+      <ScrollView 
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Profile Header - Avatar Left, Name Right */}
+        <FadeInUp delay={80}>
+          <View style={styles.profileHeader}>
+            <View style={styles.avatarWrapper}>
+              <Avatar name={user.name} size={72} />
             </View>
-          </View>
-        </View>
-      </FadeInUp>
-
-      {/* Settings Sections */}
-      <View style={styles.sectionsContainer}>
-
-        {/* Personal Info */}
-        <FadeInUp delay={120}>
-          <View style={styles.sectionWrapper}>
-            <Text style={[styles.sectionTitle, { color: themeColors.textMuted }]}>Informations personnelles</Text>
-            <View style={[styles.section, { 
-              backgroundColor: themeColors.cardBackground,
-              borderColor: themeColors.cardBorder,
-            }]}>
-              <View style={styles.sectionHeader}>
-                <Text style={[styles.sectionHeaderTitle, { color: themeColors.text }]}>Profil</Text>
-                <Pressable onPress={() => setEditing((e) => !e)}>
-                  <Text style={[styles.editButton, { color: colors.encre }]}>
-                    {editing ? 'Annuler' : 'Modifier'}
-                  </Text>
-                </Pressable>
-              </View>
-              
-              <MenuItem 
-                icon="person-outline" 
-                label="Nom complet" 
-                value={user.name}
-                editing={editing}
-                themeColors={themeColors}
-              >
-                {editing && (
-                  <TextInput 
-                    style={[styles.input, { 
-                      color: themeColors.text,
-                      backgroundColor: themeColors.inputBackground,
-                      borderColor: themeColors.inputBorder,
-                    }]} 
-                    value={name} 
-                    onChangeText={setName} 
-                    placeholder="Nom complet" 
-                    placeholderTextColor={themeColors.textSecondary} 
-                  />
-                )}
-              </MenuItem>
-              
-              <Separator themeColors={themeColors} />
-              
-              <MenuItem 
-                icon="mail-outline" 
-                label="Email" 
-                value={user.email}
-                editing={editing}
-                themeColors={themeColors}
-              >
-                {editing ? (
-                  <>
-                    <Text style={[styles.menuItemValue, { color: themeColors.text }]}>{user.email}</Text>
-                    <Text style={[styles.adminNote, { color: themeColors.textSecondary }]}>
-                      Modifiable uniquement par l&apos;administration
-                    </Text>
-                  </>
-                ) : (
-                  <Text style={[styles.menuItemValue, { color: themeColors.text }]}>{user.email}</Text>
-                )}
-              </MenuItem>
-              
-              <Separator themeColors={themeColors} />
-              
-              <MenuItem 
-                icon="call-outline" 
-                label="Téléphone" 
-                value={parent?.telephone || '—'}
-                editing={editing}
-                themeColors={themeColors}
-              >
-                {editing && (
-                  <TextInput 
-                    style={[styles.input, { 
-                      color: themeColors.text,
-                      backgroundColor: themeColors.inputBackground,
-                      borderColor: themeColors.inputBorder,
-                    }]} 
-                    value={telephone} 
-                    onChangeText={setTelephone} 
-                    placeholder="+257 ..." 
-                    keyboardType="phone-pad" 
-                    placeholderTextColor={themeColors.textSecondary} 
-                  />
-                )}
-              </MenuItem>
-            </View>
-
-            {editing && (
-              <Pressable 
-                style={[styles.saveButton, updateAccount.isPending && styles.buttonDisabled]} 
-                onPress={handleSaveProfile} 
-                disabled={updateAccount.isPending}
-              >
-                <Text style={styles.saveButtonText}>
-                  {updateAccount.isPending ? 'Enregistrement…' : 'Enregistrer les modifications'}
-                </Text>
-              </Pressable>
-            )}
-            
-            {saveSuccess && (
-              <View style={styles.successRow}>
-                <Ionicons name="checkmark-circle" size={16} color={colors.sauge} />
-                <Text style={styles.successText}>Profil mis à jour</Text>
-              </View>
-            )}
-          </View>
-        </FadeInUp>
-
-        {/* Security */}
-        <FadeInUp delay={160}>
-          <View style={styles.sectionWrapper}>
-            <Text style={[styles.sectionTitle, { color: themeColors.textMuted }]}>Sécurité</Text>
-            <View style={[styles.section, { 
-              backgroundColor: themeColors.cardBackground,
-              borderColor: themeColors.cardBorder,
-            }]}>
-              {showPasswordForm ? (
-                <>
-                  <View style={styles.sectionHeader}>
-                    <Text style={[styles.sectionHeaderTitle, { color: themeColors.text }]}>Changer le mot de passe</Text>
-                    <Pressable onPress={() => setShowPasswordForm(false)}>
-                      <Text style={[styles.editButton, { color: colors.encre }]}>Annuler</Text>
-                    </Pressable>
-                  </View>
-                  
-                  <MenuItem 
-                    icon="lock-closed-outline" 
-                    label="Mot de passe actuel" 
-                    themeColors={themeColors}
-                  >
-                    <TextInput 
-                      style={[styles.input, { 
-                        color: themeColors.text,
-                        backgroundColor: themeColors.inputBackground,
-                        borderColor: themeColors.inputBorder,
-                      }]} 
-                      value={currentPassword} 
-                      onChangeText={setCurrentPassword} 
-                      secureTextEntry 
-                      placeholderTextColor={themeColors.textSecondary} 
-                    />
-                  </MenuItem>
-                  
-                  <Separator themeColors={themeColors} />
-                  
-                  <MenuItem 
-                    icon="key-outline" 
-                    label="Nouveau mot de passe" 
-                    themeColors={themeColors}
-                  >
-                    <TextInput 
-                      style={[styles.input, { 
-                        color: themeColors.text,
-                        backgroundColor: themeColors.inputBackground,
-                        borderColor: themeColors.inputBorder,
-                      }]} 
-                      value={newPassword} 
-                      onChangeText={setNewPassword} 
-                      secureTextEntry 
-                      placeholderTextColor={themeColors.textSecondary} 
-                    />
-                  </MenuItem>
-                  
-                  <Separator themeColors={themeColors} />
-                  
-                  <MenuItem 
-                    icon="checkmark-done-outline" 
-                    label="Confirmer le nouveau mot de passe" 
-                    themeColors={themeColors}
-                  >
-                    <TextInput 
-                      style={[styles.input, { 
-                        color: themeColors.text,
-                        backgroundColor: themeColors.inputBackground,
-                        borderColor: themeColors.inputBorder,
-                      }]} 
-                      value={newPasswordConfirm} 
-                      onChangeText={setNewPasswordConfirm} 
-                      secureTextEntry 
-                      placeholderTextColor={themeColors.textSecondary} 
-                    />
-                  </MenuItem>
-                  
-                  {passwordError && <Text style={styles.errorText}>{passwordError}</Text>}
-                  
-                  <Pressable 
-                    style={[styles.saveButton, { marginTop: spacing.md }, changePassword.isPending && styles.buttonDisabled]} 
-                    onPress={handleChangePassword} 
-                    disabled={changePassword.isPending}
-                  >
-                    <Text style={styles.saveButtonText}>
-                      {changePassword.isPending ? 'Modification…' : 'Changer le mot de passe'}
-                    </Text>
-                  </Pressable>
-                  
-                  {passwordSuccess && (
-                    <View style={styles.successRow}>
-                      <Ionicons name="checkmark-circle" size={16} color={colors.sauge} />
-                      <Text style={styles.successText}>Mot de passe modifié</Text>
-                    </View>
-                  )}
-                </>
-              ) : (
-                <Pressable 
-                  style={styles.menuItemPressable}
-                  onPress={() => setShowPasswordForm(true)}
-                >
-                  <View style={styles.menuItemRow}>
-                    <View style={[styles.iconContainer, { backgroundColor: themeColors.iconBackground }]}>
-                      <Ionicons name="lock-closed-outline" size={22} color={themeColors.text} />
-                    </View>
-                    <View style={styles.menuItemContent}>
-                      <Text style={[styles.menuItemLabel, { color: themeColors.textMuted }]}>Mot de passe</Text>
-                      <Text style={[styles.menuItemValue, { color: themeColors.text }]}>••••••••</Text>
-                    </View>
-                    <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
-                  </View>
-                </Pressable>
-              )}
-            </View>
-          </View>
-        </FadeInUp>
-
-        {/* Preferences */}
-        <FadeInUp delay={200}>
-          <View style={styles.sectionWrapper}>
-            <Text style={[styles.sectionTitle, { color: themeColors.textMuted }]}>Préférences</Text>
-            <View style={[styles.section, { 
-              backgroundColor: themeColors.cardBackground,
-              borderColor: themeColors.cardBorder,
-            }]}>
-              <View style={styles.toggleItem}>
-                <View style={styles.toggleLeft}>
-                  <View style={[styles.iconContainer, { backgroundColor: themeColors.iconBackground }]}>
-                    <Ionicons name="notifications-outline" size={22} color={themeColors.text} />
-                  </View>
-                  <View>
-                    <Text style={[styles.toggleLabel, { color: themeColors.text }]}>Notifications push</Text>
-                    <Text style={[styles.toggleSubtext, { color: themeColors.textMuted }]}>Recevoir les alertes sur cet appareil</Text>
-                  </View>
-                </View>
-                <Switch 
-                  value={pushEnabled} 
-                  onValueChange={handlePushToggle} 
-                  trackColor={{ false: '#D1D1D6', true: colors.encre }} 
-                  thumbColor={colors.blanc}
-                />
-              </View>
-              
-              <Separator themeColors={themeColors} />
-              
-              <View style={styles.toggleItem}>
-                <View style={styles.toggleLeft}>
-                  <View style={[styles.iconContainer, { backgroundColor: themeColors.iconBackground }]}>
-                    <Ionicons name="moon-outline" size={22} color={themeColors.text} />
-                  </View>
-                  <View>
-                    <Text style={[styles.toggleLabel, { color: themeColors.text }]}>Thème sombre</Text>
-                    <Text style={[styles.toggleSubtext, { color: themeColors.textMuted }]}>
-                      {isDark ? 'Activé' : 'Désactivé'}
-                    </Text>
-                  </View>
-                </View>
-                <Switch 
-                  value={isDark} 
-                  onValueChange={handleThemeToggle} 
-                  trackColor={{ false: '#D1D1D6', true: colors.encre }} 
-                  thumbColor={colors.blanc}
-                />
+            <View style={styles.profileInfo}>
+              <Text style={[styles.userName, { color: themeColors.text }]}>{user.name}</Text>
+              <Text style={[styles.userEmail, { color: themeColors.textMuted }]}>{user.email}</Text>
+              <View style={styles.roleBadge}>
+                <Text style={styles.roleBadgeText}>Parent</Text>
               </View>
             </View>
           </View>
         </FadeInUp>
 
-        {/* Linked Children */}
-        {parent?.eleves && parent.eleves.length > 0 && (
-          <FadeInUp delay={240}>
+        {/* Settings Sections */}
+        <View style={styles.sectionsContainer}>
+
+          {/* Personal Info */}
+          <FadeInUp delay={120}>
             <View style={styles.sectionWrapper}>
-              <Text style={[styles.sectionTitle, { color: themeColors.textMuted }]}>Enfants liés</Text>
+              <Text style={[styles.sectionTitle, { color: themeColors.textMuted }]}>Informations personnelles</Text>
               <View style={[styles.section, { 
                 backgroundColor: themeColors.cardBackground,
                 borderColor: themeColors.cardBorder,
               }]}>
-                {parent.eleves.map((e, i) => {
-                  // Get class name from the child's data if available
-                  const childWithClass = e as any;
-                  return (
-                    <View key={e.id}>
-                      <View style={styles.childItem}>
-                        <Avatar name={`${e.prenom} ${e.nom}`} size={32} />
-                        <View style={styles.childInfo}>
-                          <Text style={[styles.childName, { color: themeColors.text }]}>
-                            {e.prenom} {e.nom}
-                          </Text>
-                          {childWithClass?.classe?.nom && (
-                            <Text style={[styles.childClass, { color: themeColors.textMuted }]}>
-                              {childWithClass.classe.nom}
-                            </Text>
-                          )}
-                        </View>
-                      </View>
-                      {i < parent.eleves!.length - 1 && <Separator themeColors={themeColors} />}
+                <View style={styles.sectionHeader}>
+                  <Text style={[styles.sectionHeaderTitle, { color: themeColors.text }]}>Profil</Text>
+                  <Pressable onPress={() => setEditing((e) => !e)}>
+                    <Text style={[styles.editButton, { color: colors.encre }]}>
+                      {editing ? 'Annuler' : 'Modifier'}
+                    </Text>
+                  </Pressable>
+                </View>
+                
+                <MenuItem 
+                  icon="person-outline" 
+                  label="Nom complet" 
+                  value={user.name}
+                  editing={editing}
+                  themeColors={themeColors}
+                >
+                  {editing && (
+                    <TextInput 
+                      style={[styles.input, { 
+                        color: themeColors.text,
+                        backgroundColor: themeColors.inputBackground,
+                        borderColor: themeColors.inputBorder,
+                      }]} 
+                      value={name} 
+                      onChangeText={setName} 
+                      placeholder="Nom complet" 
+                      placeholderTextColor={themeColors.textSecondary} 
+                    />
+                  )}
+                </MenuItem>
+                
+                <Separator themeColors={themeColors} />
+                
+                <MenuItem 
+                  icon="mail-outline" 
+                  label="Email" 
+                  value={user.email}
+                  editing={editing}
+                  themeColors={themeColors}
+                >
+                  {editing ? (
+                    <>
+                      <Text style={[styles.menuItemValue, { color: themeColors.text }]}>{user.email}</Text>
+                      <Text style={[styles.adminNote, { color: themeColors.textSecondary }]}>
+                        Modifiable uniquement par l&apos;administration
+                      </Text>
+                    </>
+                  ) : (
+                    <Text style={[styles.menuItemValue, { color: themeColors.text }]}>{user.email}</Text>
+                  )}
+                </MenuItem>
+                
+                <Separator themeColors={themeColors} />
+                
+                <MenuItem 
+                  icon="call-outline" 
+                  label="Téléphone" 
+                  value={parent?.telephone || '—'}
+                  editing={editing}
+                  themeColors={themeColors}
+                >
+                  {editing && (
+                    <TextInput 
+                      style={[styles.input, { 
+                        color: themeColors.text,
+                        backgroundColor: themeColors.inputBackground,
+                        borderColor: themeColors.inputBorder,
+                      }]} 
+                      value={telephone} 
+                      onChangeText={setTelephone} 
+                      placeholder="+257 ..." 
+                      keyboardType="phone-pad" 
+                      placeholderTextColor={themeColors.textSecondary} 
+                    />
+                  )}
+                </MenuItem>
+              </View>
+
+              {editing && (
+                <Pressable 
+                  style={[styles.saveButton, updateAccount.isPending && styles.buttonDisabled]} 
+                  onPress={handleSaveProfile} 
+                  disabled={updateAccount.isPending}
+                >
+                  <Text style={styles.saveButtonText}>
+                    {updateAccount.isPending ? 'Enregistrement…' : 'Enregistrer les modifications'}
+                  </Text>
+                </Pressable>
+              )}
+              
+              {saveSuccess && (
+                <View style={styles.successRow}>
+                  <Ionicons name="checkmark-circle" size={16} color={colors.sauge} />
+                  <Text style={styles.successText}>Profil mis à jour</Text>
+                </View>
+              )}
+            </View>
+          </FadeInUp>
+
+          {/* Security */}
+          <FadeInUp delay={160}>
+            <View style={styles.sectionWrapper}>
+              <Text style={[styles.sectionTitle, { color: themeColors.textMuted }]}>Sécurité</Text>
+              <View style={[styles.section, { 
+                backgroundColor: themeColors.cardBackground,
+                borderColor: themeColors.cardBorder,
+              }]}>
+                {showPasswordForm ? (
+                  <>
+                    <View style={styles.sectionHeader}>
+                      <Text style={[styles.sectionHeaderTitle, { color: themeColors.text }]}>Changer le mot de passe</Text>
+                      <Pressable onPress={() => setShowPasswordForm(false)}>
+                        <Text style={[styles.editButton, { color: colors.encre }]}>Annuler</Text>
+                      </Pressable>
                     </View>
-                  );
-                })}
+                    
+                    <MenuItem 
+                      icon="lock-closed-outline" 
+                      label="Mot de passe actuel" 
+                      themeColors={themeColors}
+                    >
+                      <TextInput 
+                        style={[styles.input, { 
+                          color: themeColors.text,
+                          backgroundColor: themeColors.inputBackground,
+                          borderColor: themeColors.inputBorder,
+                        }]} 
+                        value={currentPassword} 
+                        onChangeText={setCurrentPassword} 
+                        secureTextEntry 
+                        placeholderTextColor={themeColors.textSecondary} 
+                      />
+                    </MenuItem>
+                    
+                    <Separator themeColors={themeColors} />
+                    
+                    <MenuItem 
+                      icon="key-outline" 
+                      label="Nouveau mot de passe" 
+                      themeColors={themeColors}
+                    >
+                      <TextInput 
+                        style={[styles.input, { 
+                          color: themeColors.text,
+                          backgroundColor: themeColors.inputBackground,
+                          borderColor: themeColors.inputBorder,
+                        }]} 
+                        value={newPassword} 
+                        onChangeText={setNewPassword} 
+                        secureTextEntry 
+                        placeholderTextColor={themeColors.textSecondary} 
+                      />
+                    </MenuItem>
+                    
+                    <Separator themeColors={themeColors} />
+                    
+                    <MenuItem 
+                      icon="checkmark-done-outline" 
+                      label="Confirmer le nouveau mot de passe" 
+                      themeColors={themeColors}
+                    >
+                      <TextInput 
+                        style={[styles.input, { 
+                          color: themeColors.text,
+                          backgroundColor: themeColors.inputBackground,
+                          borderColor: themeColors.inputBorder,
+                        }]} 
+                        value={newPasswordConfirm} 
+                        onChangeText={setNewPasswordConfirm} 
+                        secureTextEntry 
+                        placeholderTextColor={themeColors.textSecondary} 
+                      />
+                    </MenuItem>
+                    
+                    {passwordError && <Text style={styles.errorText}>{passwordError}</Text>}
+                    
+                    <Pressable 
+                      style={[styles.saveButton, { marginTop: spacing.md }, changePassword.isPending && styles.buttonDisabled]} 
+                      onPress={handleChangePassword} 
+                      disabled={changePassword.isPending}
+                    >
+                      <Text style={styles.saveButtonText}>
+                        {changePassword.isPending ? 'Modification…' : 'Changer le mot de passe'}
+                      </Text>
+                    </Pressable>
+                    
+                    {passwordSuccess && (
+                      <View style={styles.successRow}>
+                        <Ionicons name="checkmark-circle" size={16} color={colors.sauge} />
+                        <Text style={styles.successText}>Mot de passe modifié</Text>
+                      </View>
+                    )}
+                  </>
+                ) : (
+                  <Pressable 
+                    style={styles.menuItemPressable}
+                    onPress={() => setShowPasswordForm(true)}
+                  >
+                    <View style={styles.menuItemRow}>
+                      <View style={[styles.iconContainer, { backgroundColor: themeColors.iconBackground }]}>
+                        <Ionicons name="lock-closed-outline" size={22} color={themeColors.text} />
+                      </View>
+                      <View style={styles.menuItemContent}>
+                        <Text style={[styles.menuItemLabel, { color: themeColors.textMuted }]}>Mot de passe</Text>
+                        <Text style={[styles.menuItemValue, { color: themeColors.text }]}>••••••••</Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={20} color={themeColors.textMuted} />
+                    </View>
+                  </Pressable>
+                )}
               </View>
             </View>
           </FadeInUp>
-        )}
 
-        {/* Logout */}
-        <FadeInUp delay={280}>
-          <Pressable style={styles.logoutButton} onPress={logout}>
-            <Ionicons name="log-out-outline" size={22} color={colors.brique} />
-            <Text style={styles.logoutText}>Se déconnecter</Text>
-          </Pressable>
-        </FadeInUp>
+          {/* Preferences */}
+          <FadeInUp delay={200}>
+            <View style={styles.sectionWrapper}>
+              <Text style={[styles.sectionTitle, { color: themeColors.textMuted }]}>Préférences</Text>
+              <View style={[styles.section, { 
+                backgroundColor: themeColors.cardBackground,
+                borderColor: themeColors.cardBorder,
+              }]}>
+                <View style={styles.toggleItem}>
+                  <View style={styles.toggleLeft}>
+                    <View style={[styles.iconContainer, { backgroundColor: themeColors.iconBackground }]}>
+                      <Ionicons name="notifications-outline" size={22} color={themeColors.text} />
+                    </View>
+                    <View>
+                      <Text style={[styles.toggleLabel, { color: themeColors.text }]}>Notifications push</Text>
+                      <Text style={[styles.toggleSubtext, { color: themeColors.textMuted }]}>Recevoir les alertes sur cet appareil</Text>
+                    </View>
+                  </View>
+                  <Switch 
+                    value={pushEnabled} 
+                    onValueChange={handlePushToggle} 
+                    trackColor={{ false: '#D1D1D6', true: colors.encre }} 
+                    thumbColor={colors.blanc}
+                  />
+                </View>
+                
+                <Separator themeColors={themeColors} />
+                
+                <View style={styles.toggleItem}>
+                  <View style={styles.toggleLeft}>
+                    <View style={[styles.iconContainer, { backgroundColor: themeColors.iconBackground }]}>
+                      <Ionicons name="moon-outline" size={22} color={themeColors.text} />
+                    </View>
+                    <View>
+                      <Text style={[styles.toggleLabel, { color: themeColors.text }]}>Thème sombre</Text>
+                      <Text style={[styles.toggleSubtext, { color: themeColors.textMuted }]}>
+                        {isDark ? 'Activé' : 'Désactivé'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Switch 
+                    value={isDark} 
+                    onValueChange={handleThemeToggle} 
+                    trackColor={{ false: '#D1D1D6', true: colors.encre }} 
+                    thumbColor={colors.blanc}
+                  />
+                </View>
+              </View>
+            </View>
+          </FadeInUp>
 
-        <View style={styles.bottomSpacer} />
-      </View>
-    </ScrollView>
+          {/* Linked Children */}
+          {parent?.eleves && parent.eleves.length > 0 && (
+            <FadeInUp delay={240}>
+              <View style={styles.sectionWrapper}>
+                <Text style={[styles.sectionTitle, { color: themeColors.textMuted }]}>Enfants liés</Text>
+                <View style={[styles.section, { 
+                  backgroundColor: themeColors.cardBackground,
+                  borderColor: themeColors.cardBorder,
+                }]}>
+                  {parent.eleves.map((e, i) => {
+                    // Get class name from the child's data if available
+                    const childWithClass = e as any;
+                    return (
+                      <View key={e.id}>
+                        <View style={styles.childItem}>
+                          <Avatar name={`${e.prenom} ${e.nom}`} size={32} />
+                          <View style={styles.childInfo}>
+                            <Text style={[styles.childName, { color: themeColors.text }]}>
+                              {e.prenom} {e.nom}
+                            </Text>
+                            {childWithClass?.classe?.nom && (
+                              <Text style={[styles.childClass, { color: themeColors.textMuted }]}>
+                                {childWithClass.classe.nom}
+                              </Text>
+                            )}
+                          </View>
+                        </View>
+                        {i < parent.eleves!.length - 1 && <Separator themeColors={themeColors} />}
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            </FadeInUp>
+          )}
+
+          {/* Logout */}
+          <FadeInUp delay={280}>
+            <Pressable style={styles.logoutButton} onPress={logout}>
+              <Ionicons name="log-out-outline" size={22} color={colors.brique} />
+              <Text style={styles.logoutText}>Se déconnecter</Text>
+            </Pressable>
+          </FadeInUp>
+
+          <View style={styles.bottomSpacer} />
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 

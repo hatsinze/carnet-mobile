@@ -19,11 +19,8 @@ export default function CommuniqueDetailScreen() {
   const confirmerPresence = useConfirmerPresence(communiqueId);
 
   function close() {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/(parent)/communiques');
-    }
+    if (router.canGoBack()) router.back();
+    else router.replace('/(parent)/communiques');
   }
 
   if (isLoading) return <LoadingState />;

@@ -1,6 +1,7 @@
 import { View, Text, FlatList, Pressable, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { CommuniqueCardSkeleton } from '../../../src/components/Skeleton';
 import { ErrorState } from '../../../src/components/ErrorState';
 import { useTheme } from '../../../src/features/theme/ThemeContext';
@@ -31,9 +32,7 @@ export default function PaiementsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.brume }]}>
-      <View style={styles.headerRow}>
-        <Text style={[styles.headerTitle, { color: colors.ardoise }]}>Paiements</Text>
-      </View>
+      <ScreenHeader title="Paiements" showBack={false} />
 
       {financial && financial.echeanceCount > 0 && (
         <View style={[styles.summaryCard, { backgroundColor: colors.encreDark ?? '#0D3338' }]}>
@@ -109,8 +108,6 @@ export default function PaiementsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerRow: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.sm },
-  headerTitle: { fontFamily: fonts.displayBold, fontSize: 26 },
   summaryCard: { marginHorizontal: spacing.lg, borderRadius: radius.lg, padding: spacing.lg, marginBottom: spacing.lg },
   summaryLabel: { fontFamily: fonts.bodyMedium, fontSize: 12, color: 'rgba(255,255,255,0.6)' },
   summaryAmount: { fontFamily: fonts.monoBold, fontSize: 32, color: '#FFFFFF', marginTop: 4 },

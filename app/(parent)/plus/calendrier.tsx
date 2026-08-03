@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { View, Text, ScrollView, RefreshControl, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { MonthCalendar } from '../../../src/components/MonthCalendar';
 import { SegmentedControl } from '../../../src/components/SegmentedControl';
 import { FadeInUp } from '../../../src/components/Motion';
@@ -59,67 +60,70 @@ export default function CalendrierScreen() {
   if (isError) return <ErrorState onRetry={refetch} />;
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: colors.blanc }]}
-      contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.encre} />}
-    >
-      <SegmentedControl options={[{ value: 'mois', label: 'Mois' }, { value: 'liste', label: 'Liste' }]} value={viewMode} onChange={setViewMode} />
-      <View style={{ height: spacing.lg }} />
+    <View style={[styles.container, { backgroundColor: colors.blanc }]}>
+      <ScreenHeader title="Calendrier scolaire" fallbackRoute="/(parent)/plus" />
+      
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.encre} />}
+      >
+        <SegmentedControl options={[{ value: 'mois', label: 'Mois' }, { value: 'liste', label: 'Liste' }]} value={viewMode} onChange={setViewMode} />
+        <View style={{ height: spacing.lg }} />
 
-      {viewMode === 'mois' ? (
-        <FadeInUp key="mois">
-          <View style={[styles.calendarBox, { borderColor: colors.ligne }]}>
-            <MonthCalendar currentMonth={currentMonth} onChangeMonth={setCurrentMonth} selectedDate={selectedDate} onSelectDate={setSelectedDate} events={data ?? []} />
-          </View>
-          <Text style={[styles.sectionTitle, { color: colors.ardoise }]}>{selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
-          {dayEvents.length === 0 ? (
-            <View style={styles.emptyDay}>
-              <Ionicons name="calendar-clear-outline" size={20} color={colors.ardoiseMuted} />
-              <Text style={[styles.emptyDayText, { color: colors.ardoiseMuted }]}>Aucun événement ce jour-là</Text>
+        {viewMode === 'mois' ? (
+          <FadeInUp key="mois">
+            <View style={[styles.calendarBox, { borderColor: colors.ligne }]}>
+              <MonthCalendar currentMonth={currentMonth} onChangeMonth={setCurrentMonth} selectedDate={selectedDate} onSelectDate={setSelectedDate} events={data ?? []} />
             </View>
-          ) : (
-            dayEvents.map((ev, i) => (
-              <View key={ev.id}>
-                <EventRow event={ev} colors={colors} />
-                {i < dayEvents.length - 1 && <View style={[styles.divider, { backgroundColor: colors.ligne }]} />}
+            <Text style={[styles.sectionTitle, { color: colors.ardoise }]}>{selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
+            {dayEvents.length === 0 ? (
+              <View style={styles.emptyDay}>
+                <Ionicons name="calendar-clear-outline" size={20} color={colors.ardoiseMuted} />
+                <Text style={[styles.emptyDayText, { color: colors.ardoiseMuted }]}>Aucun événement ce jour-là</Text>
               </View>
-            ))
-          )}
-        </FadeInUp>
-      ) : (
-        <FadeInUp key="liste">
-          {upcoming.length === 0 && past.length === 0 && (
-            <View style={styles.emptyDay}>
-              <Ionicons name="calendar-outline" size={22} color={colors.ardoiseMuted} />
-              <Text style={[styles.emptyDayText, { color: colors.ardoiseMuted }]}>Aucun événement à venir</Text>
-            </View>
-          )}
-          {upcoming.length > 0 && (
-            <>
-              <Text style={[styles.sectionTitle, { color: colors.ardoise }]}>À venir</Text>
-              {upcoming.map((ev, i) => (
+            ) : (
+              dayEvents.map((ev, i) => (
                 <View key={ev.id}>
                   <EventRow event={ev} colors={colors} />
-                  {i < upcoming.length - 1 && <View style={[styles.divider, { backgroundColor: colors.ligne }]} />}
+                  {i < dayEvents.length - 1 && <View style={[styles.divider, { backgroundColor: colors.ligne }]} />}
                 </View>
-              ))}
-            </>
-          )}
-          {past.length > 0 && (
-            <>
-              <Text style={[styles.sectionTitle, { color: colors.ardoise, marginTop: spacing.xl }]}>Récemment passés</Text>
-              {past.map((ev, i) => (
-                <View key={ev.id}>
-                  <EventRow event={ev} muted colors={colors} />
-                  {i < past.length - 1 && <View style={[styles.divider, { backgroundColor: colors.ligne }]} />}
-                </View>
-              ))}
-            </>
-          )}
-        </FadeInUp>
-      )}
-    </ScrollView>
+              ))
+            )}
+          </FadeInUp>
+        ) : (
+          <FadeInUp key="liste">
+            {upcoming.length === 0 && past.length === 0 && (
+              <View style={styles.emptyDay}>
+                <Ionicons name="calendar-outline" size={22} color={colors.ardoiseMuted} />
+                <Text style={[styles.emptyDayText, { color: colors.ardoiseMuted }]}>Aucun événement à venir</Text>
+              </View>
+            )}
+            {upcoming.length > 0 && (
+              <>
+                <Text style={[styles.sectionTitle, { color: colors.ardoise }]}>À venir</Text>
+                {upcoming.map((ev, i) => (
+                  <View key={ev.id}>
+                    <EventRow event={ev} colors={colors} />
+                    {i < upcoming.length - 1 && <View style={[styles.divider, { backgroundColor: colors.ligne }]} />}
+                  </View>
+                ))}
+              </>
+            )}
+            {past.length > 0 && (
+              <>
+                <Text style={[styles.sectionTitle, { color: colors.ardoise, marginTop: spacing.xl }]}>Récemment passés</Text>
+                {past.map((ev, i) => (
+                  <View key={ev.id}>
+                    <EventRow event={ev} muted colors={colors} />
+                    {i < past.length - 1 && <View style={[styles.divider, { backgroundColor: colors.ligne }]} />}
+                  </View>
+                ))}
+              </>
+            )}
+          </FadeInUp>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 

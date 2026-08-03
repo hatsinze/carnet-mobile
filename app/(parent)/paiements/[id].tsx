@@ -1,6 +1,7 @@
 import { View, Text, FlatList, Linking, StyleSheet, Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { LoadingState } from '../../../src/components/LoadingState';
 import { ErrorState } from '../../../src/components/ErrorState';
 import { useTheme } from '../../../src/features/theme/ThemeContext';
@@ -20,6 +21,8 @@ export default function PaiementDetailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.brume }]}>
+      <ScreenHeader title="Détail du paiement" fallbackRoute="/(parent)/paiements" />
+
       {data && data.length === 0 && (
         <View style={styles.emptyWrap}>
           <Ionicons name="receipt-outline" size={40} color={colors.ardoiseMuted} />
@@ -60,7 +63,6 @@ export default function PaiementDetailScreen() {
     </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: { flex: 1 },

@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../src/features/auth/AuthContext';
 import { useTheme } from '../src/features/theme/ThemeContext';
+import { FadeInUp } from '../src/components/Motion';
 import { fonts, radius, spacing } from '../src/theme/tokens';
 
 export default function LoginScreen() {
   const { login } = useAuth();
-  const { colors } = useTheme(); // colors already includes dark/light based on theme
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -26,70 +30,76 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: colors.brume }]}
+      style={{ flex: 1, backgroundColor: colors.brume }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={[styles.logoBox, { backgroundColor: colors.encre }]}>
-        <Text style={styles.logoText}>CC</Text>
-      </View>
-      <Text style={[styles.title, { color: colors.ardoise }]}>Carnet de correspondance</Text>
-      <Text style={[styles.subtitle, { color: colors.ardoiseMuted }]}>Connectez-vous à votre espace</Text>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+      >
+        <LinearGradient colors={[colors.encreDark, colors.encre]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.logoBox, { marginTop: insets.top + spacing.xxl }]}>
+          <Text style={styles.logoText}>CC</Text>
+        </LinearGradient>
 
-      <View style={[styles.card, { backgroundColor: colors.blanc, borderColor: colors.ligne }]}>
-        <Text style={[styles.label, { color: colors.ardoiseMuted }]}>Adresse e-mail</Text>
-        <TextInput
-          style={[styles.input, { 
-            backgroundColor: colors.blanc, 
-            borderColor: colors.ligne, 
-            color: colors.ardoise 
-          }]}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          placeholderTextColor={colors.ardoiseMuted}
-          placeholder="exemple@email.com"
-        />
+        <FadeInUp delay={100}>
+          <Text style={[styles.title, { color: colors.ardoise }]}>Carnet de correspondance</Text>
+          <Text style={[styles.subtitle, { color: colors.ardoiseMuted }]}>Connectez-vous à votre espace</Text>
+        </FadeInUp>
 
-        <Text style={[styles.label, { color: colors.ardoiseMuted }]}>Mot de passe</Text>
-        <TextInput
-          style={[styles.input, { 
-            backgroundColor: colors.blanc, 
-            borderColor: colors.ligne, 
-            color: colors.ardoise 
-          }]}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholderTextColor={colors.ardoiseMuted}
-          placeholder="••••••••"
-        />
+        <FadeInUp delay={180}>
+          <View style={styles.form}>
+            <View>
+              <Text style={[styles.label, { color: colors.ardoiseMuted }]}>Adresse e-mail</Text>
+              <TextInput
+                style={[styles.input, { borderColor: colors.ligne, color: colors.ardoise, backgroundColor: colors.blanc }]}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                placeholderTextColor={colors.ardoiseMuted}
+                placeholder="exemple@email.com"
+              />
+            </View>
 
-        {error && <Text style={[styles.error, { color: colors.brique }]}>{error}</Text>}
+            <View style={{ marginTop: spacing.md }}>
+              <Text style={[styles.label, { color: colors.ardoiseMuted }]}>Mot de passe</Text>
+              <TextInput
+                style={[styles.input, { borderColor: colors.ligne, color: colors.ardoise, backgroundColor: colors.blanc }]}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                placeholderTextColor={colors.ardoiseMuted}
+                placeholder="••••••••"
+              />
+            </View>
 
-        <Pressable
-          style={[styles.button, { backgroundColor: colors.encre }, isSubmitting && styles.buttonDisabled]}
-          onPress={handleSubmit}
-          disabled={isSubmitting}
-        >
-          <Text style={styles.buttonText}>{isSubmitting ? 'Connexion…' : 'Se connecter'}</Text>
-        </Pressable>
-      </View>
+            {error && <Text style={[styles.error, { color: colors.brique }]}>{error}</Text>}
+
+            <Pressable
+              style={[styles.button, { backgroundColor: colors.encre }, isSubmitting && { opacity: 0.6 }]}
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+            >
+              <Text style={styles.buttonText}>{isSubmitting ? 'Connexion…' : 'Se connecter'}</Text>
+            </Pressable>
+          </View>
+        </FadeInUp>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 24 },
-  logoBox: { width: 48, height: 48, borderRadius: 12, alignSelf: 'center', justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
-  logoText: { color: '#FFFFFF', fontWeight: '600', fontSize: 18 },
-  title: { fontSize: 24, fontWeight: '700', textAlign: 'center' },
-  subtitle: { fontSize: 15, textAlign: 'center', marginTop: 4, marginBottom: 24 },
-  card: { borderRadius: 12, borderWidth: 1, padding: 20 },
-  label: { fontSize: 13, fontWeight: '500', marginBottom: 6, marginTop: 12 },
-  input: { borderWidth: 1, borderRadius: 8, padding: 12, fontSize: 15 },
-  error: { fontSize: 13, marginTop: 8 },
-  button: { borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 20 },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#FFFFFF', fontWeight: '600', fontSize: 15 },
+  scroll: { flexGrow: 1, paddingHorizontal: spacing.xl, justifyContent: 'center', paddingBottom: spacing.xxxl },
+  logoBox: { width: 56, height: 56, borderRadius: radius.lg, alignSelf: 'center', justifyContent: 'center', alignItems: 'center', marginBottom: spacing.lg },
+  logoText: { color: '#FFFFFF', fontFamily: fonts.displayBold, fontSize: 20 },
+  title: { fontFamily: fonts.displayBold, fontSize: 24, textAlign: 'center' },
+  subtitle: { fontFamily: fonts.body, fontSize: 14, textAlign: 'center', marginTop: 4, marginBottom: spacing.xxl },
+  form: { gap: spacing.sm },
+  label: { fontFamily: fonts.bodyMedium, fontSize: 12, marginBottom: spacing.xs },
+  input: { borderWidth: 1, borderRadius: radius.md, padding: spacing.md, fontFamily: fonts.body, fontSize: 15 },
+  error: { fontFamily: fonts.body, fontSize: 13, marginTop: spacing.sm },
+  button: { borderRadius: radius.md, padding: spacing.md, alignItems: 'center', marginTop: spacing.xl },
+  buttonText: { color: '#FFFFFF', fontFamily: fonts.bodySemiBold, fontSize: 15 },
 });

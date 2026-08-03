@@ -19,7 +19,7 @@ export function Skeleton({ width, height, radius = 8, style }: SkeletonProps) {
     );
     loop.start();
     return () => loop.stop();
-  }, []);
+  }, [translateX]);
 
   const baseColor = isDark ? '#2A2A2E' : '#EAEAEA';
   const highlightColor = isDark ? '#3A3A3E' : '#F5F5F5';

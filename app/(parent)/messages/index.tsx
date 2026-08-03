@@ -1,6 +1,7 @@
 import { View, Text, FlatList, Pressable, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { Avatar } from '../../../src/components/Avatar';
 import { CommuniqueCardSkeleton } from '../../../src/components/Skeleton';
 import { ErrorState } from '../../../src/components/ErrorState';
@@ -33,12 +34,15 @@ export default function MessagesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.brume }]}>
-      <View style={styles.headerRow}>
-        <Text style={[styles.headerTitle, { color: colors.ardoise }]}>Messages</Text>
-        <Pressable style={[styles.composeButton, { backgroundColor: colors.encre }]} onPress={() => router.push('/(parent)/messages/new')}>
-          <Ionicons name="create-outline" size={18} color="#FFFFFF" />
-        </Pressable>
-      </View>
+      <ScreenHeader
+        title="Messages"
+        showBack={false}
+        right={
+          <Pressable style={[styles.composeButton, { backgroundColor: colors.encre }]} onPress={() => router.push('/(parent)/messages/new')}>
+            <Ionicons name="create-outline" size={16} color="#FFFFFF" />
+          </Pressable>
+        }
+      />
 
       {isLoading ? (
         <View style={styles.content}>{[1, 2, 3, 4].map((i) => <CommuniqueCardSkeleton key={i} />)}</View>
@@ -92,9 +96,7 @@ export default function MessagesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: spacing.md },
-  headerTitle: { fontFamily: fonts.displayBold, fontSize: 26 },
-  composeButton: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  composeButton: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxxl },
   emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
   emptyText: { fontFamily: fonts.body, fontSize: 13 },

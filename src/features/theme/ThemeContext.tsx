@@ -16,11 +16,12 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>('light');
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((saved) => {
-      if (saved === 'dark' || saved === 'light') setModeState(saved);
-    });
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((saved) => { if (saved === 'dark' || saved === 'light') setModeState(saved); })
+      .finally(() => setIsReady(true));
   }, []);
 
   function setMode(next: ThemeMode) {
@@ -29,6 +30,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }
 
   const activeColors = mode === 'dark' ? darkColors : lightColors;
+
+  // Block first paint until the stored preference is known — prevents the
+  // light→dark flash that was causing the status bar / white-screen glitch.
+  if (!isReady) return null;
 
   return (
     <ThemeContext.Provider value={{ mode, colors: activeColors, isDark: mode === 'dark', setMode }}>

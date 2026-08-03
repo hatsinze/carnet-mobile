@@ -1,25 +1,30 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Button } from '../../../src/components/Button';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
+import { Avatar } from '../../../src/components/Avatar';
 import { LoadingState } from '../../../src/components/LoadingState';
 import { ErrorState } from '../../../src/components/ErrorState';
-import { EmptyState } from '../../../src/components/EmptyState';
+import { useTheme } from '../../../src/features/theme/ThemeContext';
 import { useChildContext } from '../../../src/features/children/ChildContext';
 import { useContactableStaff } from '../../../src/hooks/useContactableStaff';
 import { useStartConversation } from '../../../src/hooks/useConversations';
 import type { ContactableStaff } from '../../../src/types/contact';
 import type { ConversationType } from '../../../src/types/conversation';
-import { colors, radius, spacing, typography } from '../../../src/theme/tokens';
+import { fonts, radius, spacing } from '../../../src/theme/tokens';
 
-const TYPES: { value: ConversationType; label: string }[] = [
-  { value: 'justification_absence', label: "Justification d'absence" },
-  { value: 'demande_rdv', label: 'Demande de rendez-vous' },
-  { value: 'question_generale', label: 'Question générale' },
+const TYPES: { value: ConversationType; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { value: 'question_generale', label: 'Question', icon: 'help-circle-outline' },
+  { value: 'demande_rdv', label: 'Rendez-vous', icon: 'calendar-outline' },
+  { value: 'justification_absence', label: 'Absence', icon: 'document-text-outline' },
 ];
 
 export default function NewConversationScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
   const { selectedChild } = useChildContext();
   const { data: staff, isLoading, isError, refetch } = useContactableStaff(selectedChild?.id);
   const startConversation = useStartConversation();
@@ -31,94 +36,107 @@ export default function NewConversationScreen() {
   function handleSend() {
     if (!selectedChild || !selectedStaff || !contenu.trim()) return;
     startConversation.mutate(
-      {
-        eleve_id: selectedChild.id,
-        destinataire_user_id: selectedStaff.user_id,
-        type: selectedType,
-        contenu: contenu.trim(),
-      },
-      {
-        onSuccess: (conversation) => {
-          router.replace(`/(parent)/messages/${conversation.id}` as any);
-        },
-      }
+      { eleve_id: selectedChild.id, destinataire_user_id: selectedStaff.user_id, type: selectedType, contenu: contenu.trim() },
+      { onSuccess: (conversation) => router.replace(`/(parent)/messages/${conversation.id}`) }
     );
   }
 
   if (isLoading) return <LoadingState />;
   if (isError) return <ErrorState onRetry={refetch} />;
-  if (staff && staff.length === 0) {
-    return <EmptyState message="Aucun contact disponible pour le moment." />;
-  }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.sectionLabel}>Sujet</Text>
-      <View style={styles.pillRow}>
-        {TYPES.map((t) => {
-          const isActive = t.value === selectedType;
-          return (
-            <Pressable
-              key={t.value}
-              style={[styles.pill, isActive && styles.pillActive]}
-              onPress={() => setSelectedType(t.value)}
-            >
-              <Text style={[styles.pillLabel, isActive && styles.pillLabelActive]}>{t.label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+    <KeyboardAvoidingView style={[styles.container, { backgroundColor: colors.brume }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScreenHeader title="Nouveau message" fallbackRoute="/(parent)/messages" />
 
-      <Text style={styles.sectionLabel}>Destinataire</Text>
-      {staff?.map((s) => {
-        const isActive = selectedStaff?.id === s.id;
-        return (
-          <Pressable
-            key={s.id}
-            style={[styles.staffRow, isActive && styles.staffRowActive]}
-            onPress={() => setSelectedStaff(s)}
-          >
-            <View>
-              <Text style={styles.staffName}>{s.prenom} {s.nom}</Text>
-              <Text style={styles.staffMatiere}>{s.matiere}</Text>
+      {!selectedStaff ? (
+        <>
+          {selectedChild && (
+            <View style={[styles.childBanner, { backgroundColor: colors.encreLight }]}>
+              <Text style={[styles.childBannerText, { color: colors.encre }]}>À propos de {selectedChild.prenom} {selectedChild.nom}</Text>
             </View>
+          )}
+          <Text style={[styles.pickLabel, { color: colors.ardoiseMuted }]}>À qui souhaitez-vous écrire ?</Text>
+          <ScrollView contentContainerStyle={styles.contactList}>
+            {staff?.map((s) => (
+              <Pressable key={s.id} style={[styles.contactRow, { borderBottomColor: colors.ligne }]} onPress={() => setSelectedStaff(s)}>
+                <Avatar name={`${s.prenom} ${s.nom}`} size={46} />
+                <View style={styles.contactInfo}>
+                  <Text style={[styles.contactName, { color: colors.ardoise }]}>{s.prenom} {s.nom}</Text>
+                  <Text style={[styles.contactMeta, { color: colors.ardoiseMuted }]}>{s.matiere}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={colors.ardoiseMuted} />
+              </Pressable>
+            ))}
+          </ScrollView>
+        </>
+      ) : (
+        <View style={{ flex: 1 }}>
+          <Pressable style={styles.selectedRow} onPress={() => setSelectedStaff(null)}>
+            <Avatar name={`${selectedStaff.prenom} ${selectedStaff.nom}`} size={40} />
+            <View style={{ flex: 1, marginLeft: spacing.md }}>
+              <Text style={[styles.contactName, { color: colors.ardoise }]}>{selectedStaff.prenom} {selectedStaff.nom}</Text>
+              <Text style={[styles.contactMeta, { color: colors.ardoiseMuted }]}>{selectedStaff.matiere}</Text>
+            </View>
+            <Text style={[styles.changeLink, { color: colors.encre }]}>Changer</Text>
           </Pressable>
-        );
-      })}
 
-      <Text style={styles.sectionLabel}>Message</Text>
-      <TextInput
-        style={styles.textarea}
-        value={contenu}
-        onChangeText={setContenu}
-        placeholder="Écrivez votre message…"
-        placeholderTextColor={colors.ardoiseMuted}
-        multiline
-        numberOfLines={4}
-      />
+          <View style={styles.typeRow}>
+            {TYPES.map((t) => {
+              const active = t.value === selectedType;
+              return (
+                <Pressable key={t.value} style={[styles.typeChip, { backgroundColor: active ? colors.encre : colors.blanc, borderColor: active ? colors.encre : colors.ligne }]} onPress={() => setSelectedType(t.value)}>
+                  <Ionicons name={t.icon} size={14} color={active ? '#FFFFFF' : colors.ardoiseMuted} />
+                  <Text style={[styles.typeChipText, { color: active ? '#FFFFFF' : colors.ardoiseMuted }]}>{t.label}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
 
-      <Button
-        label="Envoyer"
-        onPress={handleSend}
-        disabled={!selectedStaff || !contenu.trim()}
-        loading={startConversation.isPending}
-      />
-    </ScrollView>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+            <TextInput
+              style={[styles.messageInput, { color: colors.ardoise }]}
+              value={contenu}
+              onChangeText={setContenu}
+              placeholder="Écrivez votre message…"
+              placeholderTextColor={colors.ardoiseMuted}
+              multiline
+              autoFocus
+            />
+          </ScrollView>
+
+          <View style={[styles.sendRow, { borderTopColor: colors.ligne, paddingBottom: insets.bottom + spacing.sm }]}>
+            <Pressable
+              style={[styles.sendButton, { backgroundColor: colors.encre }, (!contenu.trim() || startConversation.isPending) && { opacity: 0.5 }]}
+              onPress={handleSend}
+              disabled={!contenu.trim() || startConversation.isPending}
+            >
+              <Ionicons name="send" size={16} color="#FFFFFF" />
+              <Text style={styles.sendButtonText}>{startConversation.isPending ? 'Envoi…' : 'Envoyer'}</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.brume },
-  content: { padding: spacing.lg, gap: spacing.md },
-  sectionLabel: { ...typography.label, color: colors.ardoiseMuted, marginTop: spacing.md, marginBottom: spacing.xs },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  pill: { paddingVertical: spacing.sm, paddingHorizontal: spacing.lg, borderRadius: radius.lg, backgroundColor: colors.blanc, borderWidth: 1, borderColor: colors.ligne },
-  pillActive: { backgroundColor: colors.encre, borderColor: colors.encre },
-  pillLabel: { fontSize: 13, fontWeight: '500', color: colors.ardoise },
-  pillLabelActive: { color: colors.blanc },
-  staffRow: { backgroundColor: colors.blanc, borderWidth: 1, borderColor: colors.ligne, borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.sm },
-  staffRowActive: { borderColor: colors.encre, borderWidth: 2 },
-  staffName: { ...typography.body, fontWeight: '600', color: colors.ardoise },
-  staffMatiere: { fontSize: 13, color: colors.ardoiseMuted, marginTop: 2 },
-  textarea: { borderWidth: 1, borderColor: colors.ligne, borderRadius: radius.md, padding: spacing.md, fontSize: 15, color: colors.ardoise, backgroundColor: colors.blanc, textAlignVertical: 'top', minHeight: 100 },
+  container: { flex: 1 },
+  childBanner: { marginHorizontal: spacing.lg, marginTop: spacing.md, borderRadius: radius.sm, paddingVertical: spacing.sm, paddingHorizontal: spacing.md },
+  childBannerText: { fontFamily: fonts.bodySemiBold, fontSize: 12 },
+  pickLabel: { fontFamily: fonts.bodyMedium, fontSize: 13, paddingHorizontal: spacing.lg, marginTop: spacing.lg, marginBottom: spacing.sm },
+  contactList: { paddingHorizontal: spacing.lg },
+  contactRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md, borderBottomWidth: StyleSheet.hairlineWidth },
+  contactInfo: { flex: 1, minWidth: 0 },
+  contactName: { fontFamily: fonts.bodySemiBold, fontSize: 15 },
+  contactMeta: { fontFamily: fonts.body, fontSize: 12, marginTop: 2 },
+  selectedRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
+  changeLink: { fontFamily: fonts.bodySemiBold, fontSize: 12 },
+  typeRow: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, marginBottom: spacing.md },
+  typeChip: { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: radius.lg, borderWidth: 1, paddingVertical: 6, paddingHorizontal: spacing.md },
+  typeChipText: { fontFamily: fonts.bodyMedium, fontSize: 12 },
+  messageInput: { flex: 1, fontFamily: fonts.body, fontSize: 16, paddingHorizontal: spacing.lg, paddingTop: spacing.sm, textAlignVertical: 'top', lineHeight: 22 },
+  sendRow: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, borderTopWidth: StyleSheet.hairlineWidth },
+  sendButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: radius.md, paddingVertical: spacing.md },
+  sendButtonText: { fontFamily: fonts.bodySemiBold, fontSize: 14, color: '#FFFFFF' },
 });

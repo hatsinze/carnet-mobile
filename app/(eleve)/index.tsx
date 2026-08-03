@@ -61,43 +61,43 @@ export default function ResultatsScreen() {
         {data?.classement && (
           <View style={styles.statRow}>
             <View style={styles.statBox}>
-              <Text style={styles.statValue}>{data.classement.moyenne_generale.toFixed(2)}</Text>
+              <Text style={styles.statValue}>{data.classement.moyenne_generale?.toFixed(2) ?? '—'}</Text>
               <Text style={styles.statLabel}>Moyenne /20</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statValue}>{data.classement.pourcentage_general.toFixed(0)}%</Text>
+              <Text style={styles.statValue}>{data.classement.pourcentage_general?.toFixed(0) ?? '—'}%</Text>
               <Text style={styles.statLabel}>Pourcentage</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statValue}>{data.classement.rang_general}e</Text>
+              <Text style={styles.statValue}>{data.classement.rang_general ?? '—'}e</Text>
               <Text style={styles.statLabel}>Rang général</Text>
             </View>
           </View>
         )}
 
-        {data?.moyennes.length === 0 && (
+        {!data?.moyennes || data.moyennes.length === 0 ? (
           <EmptyState message="Aucune note enregistrée pour cette période." />
+        ) : (
+          data.moyennes.map((m) => (
+            <Card key={m.matiere} style={styles.matiereCard}>
+              <View style={styles.matiereHeader}>
+                <View style={styles.matiereIcon}>
+                  <Ionicons name="book-outline" size={18} color={colors.encre} />
+                </View>
+                <View style={styles.matiereInfo}>
+                  <Text style={styles.matiereNom}>{m.matiere}</Text>
+                  <Text style={styles.matiereCoef}>Coefficient {m.coefficient ?? '—'}</Text>
+                </View>
+                <Text style={[styles.matiereMoyenne, { color: (m.moyenne ?? 0) >= 10 ? colors.sauge : colors.brique }]}>
+                  {m.moyenne !== null && m.moyenne !== undefined ? m.moyenne.toFixed(2) : '—'}
+                </Text>
+              </View>
+              {m.rang_matiere !== null && m.rang_matiere !== undefined && (
+                <Text style={styles.matiereRang}>Ma place : {m.rang_matiere}e</Text>
+              )}
+            </Card>
+          ))
         )}
-
-        {data?.moyennes.map((m) => (
-          <Card key={m.matiere} style={styles.matiereCard}>
-            <View style={styles.matiereHeader}>
-              <View style={styles.matiereIcon}>
-                <Ionicons name="book-outline" size={18} color={colors.encre} />
-              </View>
-              <View style={styles.matiereInfo}>
-                <Text style={styles.matiereNom}>{m.matiere}</Text>
-                <Text style={styles.matiereCoef}>Coefficient {m.coefficient}</Text>
-              </View>
-              <Text style={[styles.matiereMoyenne, { color: m.moyenne >= 10 ? colors.sauge : colors.brique }]}>
-                {m.moyenne.toFixed(2)}
-              </Text>
-            </View>
-            {m.rang_matiere !== null && (
-              <Text style={styles.matiereRang}>Ma place : {m.rang_matiere}e</Text>
-            )}
-          </Card>
-        ))}
       </ScrollView>
     </View>
   );

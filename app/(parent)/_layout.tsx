@@ -37,6 +37,7 @@ export default function ParentLayout() {
           <Tabs.Screen name="paiements" options={{ title: 'Paiements', tabBarIcon: ({ focused, color }) => <TabIcon focused={focused} color={color} icon={focused ? 'card' : 'card-outline'} /> }} />
           <Tabs.Screen name="messages" options={{ title: 'Messages', tabBarIcon: ({ focused, color }) => <TabIcon focused={focused} color={color} icon={focused ? 'chatbubble' : 'chatbubble-outline'} /> }} />
           <Tabs.Screen name="plus" options={{ title: 'Plus', tabBarIcon: ({ focused, color }) => <TabIcon focused={focused} color={color} icon={focused ? 'menu' : 'menu-outline'} /> }} />
+          <Tabs.Screen name="communiques" options={{ href: null }} />
         </Tabs>
       </ChildLoader>
     </ChildProvider>

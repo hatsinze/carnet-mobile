@@ -1,6 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { ScreenHeader } from '../../../src/components/ScreenHeader';
 import { useTheme } from '../../../src/features/theme/ThemeContext';
 import { fonts, radius, spacing } from '../../../src/theme/tokens';
 
@@ -17,6 +18,8 @@ export default function PlusMenuScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.brume }]}>
+      <ScreenHeader title="Plus" showBack={false} />
+      
       <View style={[styles.list, { backgroundColor: colors.blanc, borderColor: colors.ligne }]}>
         {ITEMS.map((item, i) => (
           <Pressable
