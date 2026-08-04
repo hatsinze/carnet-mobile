@@ -10,16 +10,29 @@ interface ScreenHeaderProps {
   showBack?: boolean;
   fallbackRoute?: string;
   right?: React.ReactNode;
+  onBackPress?: () => void; // Added: custom back handler
 }
 
-export function ScreenHeader({ title, showBack = true, fallbackRoute, right }: ScreenHeaderProps) {
+export function ScreenHeader({ 
+  title, 
+  showBack = true, 
+  fallbackRoute, 
+  right,
+  onBackPress, // Added: custom back handler
+}: ScreenHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
 
   function goBack() {
-    if (router.canGoBack()) router.back();
-    else if (fallbackRoute) router.replace(fallbackRoute as any);
+    if (onBackPress) {
+      // Use custom handler if provided
+      onBackPress();
+    } else if (router.canGoBack()) {
+      router.back();
+    } else if (fallbackRoute) {
+      router.replace(fallbackRoute as any);
+    }
   }
 
   return (

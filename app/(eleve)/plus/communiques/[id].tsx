@@ -1,5 +1,5 @@
 import { Text, ScrollView, StyleSheet, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ScreenHeader } from '../../../../src/components/ScreenHeader';
 import { LoadingState } from '../../../../src/components/LoadingState';
@@ -10,15 +10,28 @@ import { fonts, radius, spacing } from '../../../../src/theme/tokens';
 
 export default function CommuniqueDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const { colors } = useTheme();
   const { data, isLoading, isError, refetch } = useCommunique(Number(id));
+
+  function goBack() {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(eleve)/plus/communiques');
+    }
+  }
 
   if (isLoading) return <LoadingState />;
   if (isError || !data) return <ErrorState onRetry={refetch} />;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.brume }]}>
-      <ScreenHeader title="Communiqué" fallbackRoute="/(eleve)/plus/communiques" />
+      <ScreenHeader 
+        title="Communiqué" 
+        fallbackRoute="/(eleve)/plus/communiques"
+        onBackPress={goBack}
+      />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Status */}

@@ -48,13 +48,6 @@ const cardShadow = {
   elevation: 2,
 };
 
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Bonjour';
-  if (h < 18) return 'Bon après-midi';
-  return 'Bonsoir';
-}
-
 export default function AccueilScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -66,9 +59,9 @@ export default function AccueilScreen() {
   const { data: periodes } = usePeriodes();
   const currentPeriodeId = periodes && periodes.length > 0 ? periodes[0].id : undefined;
   
-  // Use the same data source as Résultats for consistency
-  const { data: resultatsData, isLoading, isError, refetch, isRefetching } = useEleveResultats(currentPeriodeId);
-  const { data: bilan } = useBilanEleve(eleve?.id, currentPeriodeId);
+  // Use bilan for discipline data (current period only)
+  const { data: bilan, isLoading: bilanLoading, isError: bilanError, refetch: bilanRefetch, isRefetching: bilanRefetching } = useBilanEleve(eleve?.id, currentPeriodeId);
+  const { data: resultatsData, isLoading: resultatsLoading, isError: resultatsError, refetch: resultatsRefetch, isRefetching: resultatsRefetching } = useEleveResultats(currentPeriodeId);
   const { data: upcomingEvents } = useUpcomingEvenements(2);
   const { data: communiquesData } = useCommuniques();
 
@@ -77,16 +70,26 @@ export default function AccueilScreen() {
   const latestCommuniques = communiquesData?.pages[0]?.data.slice(0, 2) ?? [];
   const disciplineScore = bilan?.score;
 
+  // Get data from bilan for discipline counts (current period only)
+  const retraits = bilan?.retraits ?? [];
+  const fautes = retraits.filter(r => r.source === 'faute').length;
+  const disciplineOk = fautes === 0;
+  const pointsRetires = disciplineScore?.points_retires ?? 0;
+
   // Get data from resultats (same as Résultats tab)
   const generalAvg = resultatsData?.classement?.moyenne_generale ?? null;
   const rank = resultatsData?.classement?.rang_general ?? null;
-  
-  // Calculate fautes from bilan or use 0
-  const fautes = bilan?.score?.points_retires ?? 0;
-  const sanctions = 0; // If you have sanctions data, add it here
 
-  // Get communiques non lus from communiquesData or use 0
+  // Get communiques non lus from communiquesData
   const communiquesNonLus = communiquesData?.pages[0]?.data.filter((c) => !c.lu).length ?? 0;
+
+  const isLoading = bilanLoading || resultatsLoading;
+  const isError = bilanError || resultatsError;
+
+  function handleRefresh() {
+    bilanRefetch();
+    resultatsRefetch();
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.brume }]}>
@@ -98,7 +101,7 @@ export default function AccueilScreen() {
             <View style={styles.heroChildRow}>
               <Avatar name={fullName} size={52} />
               <View style={styles.heroChildInfo}>
-                <Text style={styles.heroChildName} numberOfLines={1}>{greeting()}, {eleve.prenom}</Text>
+                <Text style={styles.heroChildName} numberOfLines={1}>{eleve.prenom}</Text>
                 {eleve.matricule && <Text style={styles.heroChildClasse}>{eleve.matricule}</Text>}
               </View>
             </View>
@@ -131,10 +134,10 @@ export default function AccueilScreen() {
 
       <ScrollView
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.encre} />}
+        refreshControl={<RefreshControl refreshing={bilanRefetching || resultatsRefetching} onRefresh={handleRefresh} tintColor={colors.encre} />}
       >
         {isLoading && <LoadingState />}
-        {isError && <ErrorState onRetry={refetch} />}
+        {isError && <ErrorState onRetry={handleRefresh} />}
 
         {/* À venir Section */}
         <FadeInUp delay={220}>
@@ -199,14 +202,18 @@ export default function AccueilScreen() {
           <Text style={[styles.sectionTitle, { color: colors.ardoise }]}>Comportement</Text>
           <PressableScale onPress={() => router.push('/(eleve)/comportement')}>
             <View style={[styles.behaviorCard, cardShadow, { backgroundColor: colors.blanc }]}>
-              <View style={[styles.behaviorIcon, { backgroundColor: fautes === 0 ? colors.saugeLight : colors.briqueLight }]}>
-                <Ionicons name={fautes === 0 ? 'shield-checkmark-outline' : 'shield-outline'} size={18} color={fautes === 0 ? colors.sauge : colors.brique} />
+              <View style={[styles.behaviorIcon, { backgroundColor: disciplineOk ? colors.saugeLight : colors.briqueLight }]}>
+                <Ionicons name={disciplineOk ? 'shield-checkmark-outline' : 'shield-outline'} size={18} color={disciplineOk ? colors.sauge : colors.brique} />
               </View>
               <View style={styles.behaviorInfo}>
                 <Text style={[styles.behaviorTitle, { color: colors.ardoise }]}>
-                  {fautes === 0 ? 'Bon comportement' : `${fautes} faute(s), ${sanctions} sanction(s)`}
+                  {disciplineOk ? 'Bon comportement' : `${fautes} faute(s)`}
                 </Text>
-                <Text style={[styles.behaviorMeta, { color: colors.ardoiseMuted }]}>Cette période scolaire</Text>
+                <Text style={[styles.behaviorMeta, { color: colors.ardoiseMuted }]}>
+                  {disciplineOk 
+                    ? 'Aucune faute enregistrée' 
+                    : `${pointsRetires} points retirés`}
+                </Text>
               </View>
               <Ionicons name="chevron-forward" size={16} color={colors.ardoiseMuted} />
             </View>
