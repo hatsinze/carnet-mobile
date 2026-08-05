@@ -137,7 +137,7 @@ npx expo start -c
 1. Start the backend API:
 
 ```bash
-php artisan serve --host=0.0.0.0 --port=8000
+php artisan serve --host=0.0.0.0
 ```
 
 2. Update `.env`:
@@ -237,7 +237,7 @@ The application uses the same authentication system as the backend.
 
 # 👨‍💻 Contributor
 
-**Hatsinze Credo Adorate**  
+**Hatsinze Crédo Adorate**  
 Full Stack Developer
 
 ---
