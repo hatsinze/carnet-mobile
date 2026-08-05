@@ -161,160 +161,42 @@ npx expo start
 ```text
 carnet-mobile/
 │
-├── app/                              # Expo Router - File-based navigation
-│   ├── (eleve)/                      # Student dashboard routes
-│   │   ├── plus/                     # Student plus menu
-│   │   │   ├── compte.tsx            # Student account page
-│   │   │   ├── index.tsx             # Student plus menu
-│   │   │   └── _layout.tsx           # Student plus layout
-│   │   ├── communiques/              # Student communiqués
-│   │   │   ├── index.tsx             # Communiqués list
-│   │   │   ├── [id].tsx              # Communiqué detail
-│   │   │   └── _layout.tsx           # Communiqués layout
-│   │   ├── comportement.tsx          # Student behavior
-│   │   ├── emploi.tsx                # Student timetable
-│   │   ├── index.tsx                 # Student home
-│   │   ├── resultats.tsx             # Student results
-│   │   └── _layout.tsx               # Student layout
+├── app/
+│   ├── (eleve)/                    # Student dashboard screens
+│   │   ├── plus/                   # Student plus menu
+│   │   ├── communiques/            # Student communiqués
+│   │   └── [screens]               # index, resultats, comportement, emploi
 │   │
-│   ├── (parent)/                     # Parent dashboard routes
-│   │   ├── communiques/              # Parent communiqués
-│   │   │   ├── index.tsx             # Communiqués list
-│   │   │   ├── [id].tsx              # Communiqué detail
-│   │   │   └── _layout.tsx           # Communiqués layout
-│   │   ├── messages/                 # Parent messages
-│   │   │   ├── index.tsx             # Messages list
-│   │   │   ├── new.tsx               # New message
-│   │   │   ├── [id].tsx              # Message thread
-│   │   │   └── _layout.tsx           # Messages layout
-│   │   ├── paiements/                # Parent payments
-│   │   │   ├── index.tsx             # Payments list
-│   │   │   ├── [id].tsx              # Payment detail
-│   │   │   └── _layout.tsx           # Payments layout
-│   │   ├── plus/                     # Parent plus menu
-│   │   │   ├── calendrier.tsx        # School calendar
-│   │   │   ├── communiques.tsx       # Communiqués redirect
-│   │   │   ├── comportement.tsx      # Behavior
-│   │   │   ├── compte.tsx            # My account
-│   │   │   ├── index.tsx             # Plus menu
-│   │   │   └── _layout.tsx           # Plus layout
-│   │   ├── index.tsx                 # Parent home
-│   │   ├── resultats.tsx             # Parent results
-│   │   └── _layout.tsx               # Parent layout
+│   ├── (parent)/                   # Parent dashboard screens
+│   │   ├── communiques/            # Parent communiqués
+│   │   ├── messages/               # Parent messages
+│   │   ├── paiements/              # Parent payments
+│   │   ├── plus/                   # Parent plus menu
+│   │   └── [screens]               # index, resultats
 │   │
-│   ├── index.tsx                     # App entry
-│   ├── login.tsx                     # Login screen
-│   └── _layout.tsx                   # Root layout
+│   ├── index.tsx                   # App entry
+│   ├── login.tsx                   # Login screen
+│   └── _layout.tsx                 # Root layout
 │
-├── src/                              # Source code
-│   ├── components/                   # Reusable UI components
-│   │   ├── Avatar.tsx
-│   │   ├── Button.tsx
-│   │   ├── Card.tsx
-│   │   ├── ChildSwitcher.tsx
-│   │   ├── EmptyState.tsx
-│   │   ├── ErrorBoundary.tsx
-│   │   ├── ErrorState.tsx
-│   │   ├── IconTile.tsx
-│   │   ├── InfoChip.tsx
-│   │   ├── Input.tsx
-│   │   ├── LastUpdated.tsx
-│   │   ├── LoadingState.tsx
-│   │   ├── MonthCalendar.tsx
-│   │   ├── Motion.tsx
-│   │   ├── OfflineBanner.tsx
-│   │   ├── ProgressBar.tsx
-│   │   ├── ProgressRing.tsx
-│   │   ├── ScreenHeader.tsx
-│   │   ├── SegmentedControl.tsx
-│   │   ├── Skeleton.tsx
-│   │   └── StatusBadge.tsx
-│   │
-│   ├── features/                     # Feature modules
-│   │   ├── auth/                     # Authentication
-│   │   │   └── AuthContext.tsx
-│   │   ├── children/                 # Child management
-│   │   │   ├── ChildContext.tsx
-│   │   │   └── ChildLoader.tsx
-│   │   └── theme/                    # Theme management
-│   │       └── ThemeContext.tsx
-│   │
-│   ├── hooks/                        # Custom React hooks
-│   │   ├── useAccueilExtras.ts
-│   │   ├── useBilanEleve.ts
-│   │   ├── useChangePassword.ts
-│   │   ├── useCommuniques.ts
-│   │   ├── useContactableStaff.ts
-│   │   ├── useConversations.ts
-│   │   ├── useDeviceToken.ts
-│   │   ├── useEleveCalendrier.ts
-│   │   ├── useEleveResultats.ts
-│   │   ├── useEleveSanctions.ts
-│   │   ├── useEleveStats.ts
-│   │   ├── useFinancialSummary.ts
-│   │   ├── useIsOnline.ts
-│   │   ├── useMinervalEleves.ts
-│   │   ├── useMoyennes.ts
-│   │   ├── useMyEleves.ts
-│   │   ├── usePaiementsHistory.ts
-│   │   ├── usePeriodes.ts
-│   │   └── useUpdateAccount.ts
-│   │
-│   ├── lib/                          # Utilities & configuration
-│   │   ├── api-client.ts             # API client
-│   │   ├── calendar-utils.ts         # Calendar utilities
-│   │   ├── download.ts               # Download helper
-│   │   ├── notifications.ts          # Notifications
-│   │   └── query-client.ts           # TanStack Query client
-│   │
-│   ├── theme/                        # Design system
-│   │   └── tokens.ts                 # Colors, fonts, spacing
-│   │
-│   └── types/                        # TypeScript type definitions
-│       ├── auth.ts
-│       ├── calendrier.ts
-│       ├── communique.ts
-│       ├── contact.ts
-│       ├── conversation.ts
-│       ├── discipline.ts
-│       ├── eleve-resultats.ts
-│       ├── eleve.ts
-│       ├── finance.ts
-│       ├── moyenne.ts
-│       ├── pagination.ts
-│       ├── periode.ts
-│       └── sanction.ts
+├── src/
+│   ├── components/                 # Reusable UI components
+│   ├── features/                   # Feature modules
+│   │   ├── auth/                   # Authentication
+│   │   ├── children/               # Child management
+│   │   └── theme/                  # Theme management
+│   ├── hooks/                      # Custom React hooks
+│   ├── lib/                        # Utilities & configuration
+│   ├── theme/                      # Design tokens (colors, fonts, spacing)
+│   └── types/                      # TypeScript type definitions
 │
-├── components/                       # Root components (Expo)
-│   ├── external-link.tsx
-│   ├── haptic-tab.tsx
-│   ├── hello-wave.tsx
-│   ├── parallax-scroll-view.tsx
-│   ├── themed-text.tsx
-│   ├── themed-view.tsx
-│   └── ui/
-│       ├── collapsible.tsx
-│       ├── icon-symbol.ios.tsx
-│       └── icon-symbol.tsx
-│
-├── constants/                        # App constants
-│   └── theme.ts
-│
-├── hooks/                            # Root hooks
-│   ├── use-color-scheme.ts
-│   ├── use-color-scheme.web.ts
-│   └── use-theme-color.ts
-│
-├── assets/                           # Images & assets
-│   └── images/
-│
-├── .env                              # Environment variables
-├── .env.example                      # Environment example
-├── app.json                          # Expo app configuration
-├── eas.json                          # EAS Build configuration
-├── google-services.json              # Firebase config
-├── package.json                      # Dependencies
-└── tsconfig.json                     # TypeScript configuration
+├── assets/                         # Images & assets
+├── components/                     # Root Expo components
+├── constants/                      # App constants
+├── hooks/                          # Root hooks
+├── .env                            # Environment variables
+├── app.json                        # Expo app configuration
+├── eas.json                        # EAS Build configuration
+└── package.json                    # Dependencies
 
 ```
 
