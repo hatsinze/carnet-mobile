@@ -1,50 +1,247 @@
-# Welcome to your Expo app 👋
+# 📱 Carnet de Correspondance - Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<p align="center">
+  <img src="https://img.shields.io/badge/Expo-54.x-000.svg" alt="Expo">
+  <img src="https://img.shields.io/badge/React_Native-0.81-blue.svg" alt="React Native">
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6.svg" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Platform-iOS%20%26%20Android-lightgrey.svg" alt="Platform">
+</p>
 
-## Get started
+---
 
-1. Install dependencies
+## 📋 Overview
 
-   ```bash
-   npm install
-   ```
+**Carnet de Correspondance Mobile** is the mobile application companion for the Carnet de Correspondance school management platform.
 
-2. Start the app
+Built with **React Native and Expo**, the application provides a mobile experience for:
 
-   ```bash
-   npx expo start
-   ```
+- 👨‍👩‍👧 Parents
+- 🎓 Students
 
-In the output, you'll find options to open the app in a
+The application communicates with the same backend API used by the web platform.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+# ✨ Features
 
-## Get a fresh project
+## 👨‍👩‍👧 Parent Features
 
-When you're ready, run:
+- Switch between multiple children
+- View academic results and rankings
+- Track school fees and payments
+- Download payment receipts
+- Receive school announcements
+- Send and receive messages
+- View discipline records
+- Access school calendar
+- Manage account information
+
+---
+
+## 🎓 Student Features
+
+- View personal results
+- Check timetable
+- View discipline records
+- Read school announcements
+- Access personal information
+
+---
+
+# 🛠️ Technology Stack
+
+| Technology | Version |
+|---|---|
+| React Native | 0.81 |
+| Expo | 54.x |
+| TypeScript | 5.x |
+| Navigation | Expo Router |
+| Data Fetching | TanStack Query |
+| Styling | NativeWind |
+| Local Storage | AsyncStorage |
+| Notifications | Expo Notifications |
+
+---
+
+# 🚀 Installation
+
+## Requirements
+
+Make sure you have:
+
+- Node.js >= 18
+- npm or yarn
+- Expo CLI
+- Android Studio or Xcode (for emulators)
+
+---
+
+## Setup
 
 ```bash
-npm run reset-project
+# Clone repository
+git clone https://github.com/hatsinze/carnet-mobile.git
+
+cd carnet-mobile
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## Environment Configuration
 
-To learn more about developing your project with Expo, look at the following resources:
+Update `.env`:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```env
+EXPO_PUBLIC_API_URL=http://localhost:8000/api/v1
+```
 
-## Join the community
+For physical device testing, replace `localhost` with your computer's local IP:
 
-Join our community of developers creating universal apps.
+```env
+EXPO_PUBLIC_API_URL=http://192.168.x.x:8000/api/v1
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
+# ▶️ Running the Application
+
+Start Expo:
+
+```bash
+npx expo start
+```
+
+Run directly:
+
+```bash
+# Android
+npx expo start --android
+
+# iOS
+npx expo start --ios
+
+# Clear cache
+npx expo start -c
+```
+
+---
+
+# 📱 Physical Device Testing
+
+1. Start the backend API:
+
+```bash
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+2. Update `.env`:
+
+```env
+EXPO_PUBLIC_API_URL=http://YOUR_LOCAL_IP:8000/api/v1
+```
+
+3. Start Expo:
+
+```bash
+npx expo start
+```
+
+4. Scan the QR code using **Expo Go**.
+
+---
+
+# 📁 Project Structure
+
+```text
+carnet-mobile/
+│
+├── app/
+│   ├── (parent)/              # Parent navigation
+│   │   ├── index.tsx          # Dashboard
+│   │   ├── resultats.tsx      # Results
+│   │   ├── paiements/         # Payments
+│   │   ├── messages/          # Messaging
+│   │   └── plus/              # Additional features
+│   │
+│   ├── (eleve)/               # Student navigation
+│   │
+│   ├── login.tsx              # Authentication screen
+│   └── _layout.tsx            # Root layout
+│
+├── src/
+│   ├── components/            # Reusable components
+│   ├── features/              # Feature modules
+│   ├── hooks/                 # Custom hooks
+│   ├── lib/                   # API and utilities
+│   ├── theme/                 # Design system
+│   └── types/                 # TypeScript definitions
+│
+├── assets/                    # Images and fonts
+├── .env.example               # Environment template
+└── package.json
+```
+
+---
+
+# 📦 Production Build
+
+Production builds are handled using **Expo Application Services (EAS)**.
+
+Install EAS CLI:
+
+```bash
+npm install -g eas-cli
+```
+
+Login:
+
+```bash
+eas login
+```
+
+Build Android:
+
+```bash
+eas build --platform android
+```
+
+Build iOS:
+
+```bash
+eas build --platform ios
+```
+
+---
+
+# 👥 Test Accounts
+
+The application uses the same authentication system as the backend.
+
+| Role | Email | Password |
+|---|---|---|
+| Direction | direction@ecole-test.com | password |
+| Enseignant | enseignant@ecole-test.com | password |
+| Personnel Admin | admin@ecole-test.com | password |
+| Parent | jean.parent@test.com | password |
+| Élève | aimee@ecole-test.com | password |
+
+> All test accounts use `password` as the password.
+
+---
+
+# 👨‍💻 Contributor
+
+**Hatsinze Credo Adorate**  
+Full Stack Developer
+
+---
+
+# 📄 License
+
+MIT License
